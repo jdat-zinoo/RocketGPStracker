@@ -169,7 +169,9 @@ Used for: Condor C1216&lt;p&gt;
 <wire x1="5" y1="5" x2="-5" y2="5" width="0.127" layer="21"/>
 <wire x1="-5" y1="5" x2="-5" y2="-5" width="0.127" layer="21"/>
 <wire x1="-5" y1="-5" x2="5" y2="-5" width="0.127" layer="21"/>
-<smd name="11" x="0" y="0" dx="6.35" dy="13" layer="1"/>
+<smd name="11" x="0" y="0" dx="6.35" dy="12" layer="1" stop="no"/>
+<hole x="0" y="1" drill="2"/>
+<circle x="0" y="1" radius="1" width="0.127" layer="41"/>
 </package>
 <package name="A2235-H">
 <description>&lt;b&gt;Package 1216, 24-pads&lt;/b&gt;&lt;p&gt;
@@ -213,6 +215,11 @@ Used for: Condor C1216&lt;p&gt;
 <smd name="107" x="3.81" y="5.715" dx="1.27" dy="1.27" layer="1" rot="R180"/>
 <smd name="106" x="3.81" y="-5.715" dx="1.27" dy="1.27" layer="1" rot="R180"/>
 <smd name="105" x="-1.27" y="5.715" dx="1.27" dy="1.27" layer="1" rot="R180"/>
+<smd name="201" x="8.255" y="-5.08" dx="1.2" dy="0.8" layer="1" rot="R180"/>
+<smd name="202" x="8.255" y="-6.35" dx="1.2" dy="0.8" layer="1" rot="R180"/>
+<smd name="203" x="8.255" y="-7.62" dx="1.2" dy="0.8" layer="1" rot="R180"/>
+<hole x="0.255" y="0.69" drill="3"/>
+<circle x="0.255" y="0.69" radius="1.5" width="0.127" layer="41"/>
 </package>
 <package name="RFM">
 <wire x1="-10.16" y1="8.6975" x2="9.49125" y2="8.6975" width="0.127" layer="21"/>
