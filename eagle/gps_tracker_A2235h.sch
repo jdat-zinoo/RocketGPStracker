@@ -8193,6 +8193,71 @@ Source: MC-306_405_406_E07X.PDF</description>
 <text x="-4.0192" y="2.815" size="1.27" layer="25">&gt;NAME</text>
 <text x="-4.0192" y="-4.593" size="1.27" layer="27">&gt;VALUE</text>
 </package>
+<package name="RFM">
+<wire x1="-10.16" y1="8.6975" x2="9.49125" y2="8.6975" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="-7.62" x2="9.49125" y2="-7.62" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="-6.3225" x2="-10.16" y2="-6.8225" width="0.127" layer="21" curve="-180"/>
+<wire x1="-10.16" y1="-4.48125" x2="-10.16" y2="-4.98125" width="0.127" layer="21" curve="-180"/>
+<wire x1="-10.16" y1="-2.48125" x2="-10.16" y2="-2.98125" width="0.127" layer="21" curve="-180"/>
+<wire x1="-10.16" y1="-0.48125" x2="-10.16" y2="-0.98125" width="0.127" layer="21" curve="-180"/>
+<wire x1="-10.16" y1="1.6775" x2="-10.16" y2="1.1775" width="0.127" layer="21" curve="-180"/>
+<wire x1="-10.16" y1="3.6775" x2="-10.16" y2="3.1775" width="0.127" layer="21" curve="-180"/>
+<wire x1="-10.16" y1="5.83625" x2="-10.16" y2="5.33625" width="0.127" layer="21" curve="-180"/>
+<wire x1="-10.16" y1="-7.62" x2="-10.16" y2="-6.8225" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="-6.3225" x2="-10.16" y2="-4.98125" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="-4.48125" x2="-10.16" y2="-2.98125" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="-2.48125" x2="-10.16" y2="-0.98125" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="-0.48125" x2="-10.16" y2="1.1775" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="1.6775" x2="-10.16" y2="3.1775" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="3.6775" x2="-10.16" y2="5.33625" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="5.83625" x2="-10.16" y2="7.4" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="7.9" x2="-10.16" y2="8.6975" width="0.127" layer="21"/>
+<wire x1="9.49125" y1="-6.8225" x2="9.49125" y2="-6.3225" width="0.127" layer="21" curve="-180"/>
+<wire x1="9.49125" y1="-4.98125" x2="9.49125" y2="-4.48125" width="0.127" layer="21" curve="-180"/>
+<wire x1="9.49125" y1="-2.98125" x2="9.49125" y2="-2.48125" width="0.127" layer="21" curve="-180"/>
+<wire x1="9.49125" y1="-0.8225" x2="9.49125" y2="-0.3225" width="0.127" layer="21" curve="-180"/>
+<wire x1="9.49125" y1="1.1775" x2="9.49125" y2="1.6775" width="0.127" layer="21" curve="-180"/>
+<wire x1="9.49125" y1="3.1775" x2="9.49125" y2="3.6775" width="0.127" layer="21" curve="-180"/>
+<wire x1="9.49125" y1="5.33625" x2="9.49125" y2="5.83625" width="0.127" layer="21" curve="-180"/>
+<wire x1="9.49125" y1="-7.62" x2="9.49125" y2="-6.8225" width="0.127" layer="21"/>
+<wire x1="9.49125" y1="-6.3225" x2="9.49125" y2="-4.98125" width="0.127" layer="21"/>
+<wire x1="9.49125" y1="-4.48125" x2="9.49125" y2="-2.98125" width="0.127" layer="21"/>
+<wire x1="9.49125" y1="-2.48125" x2="9.49125" y2="-0.8225" width="0.127" layer="21"/>
+<wire x1="9.49125" y1="-0.3225" x2="9.49125" y2="1.1775" width="0.127" layer="21"/>
+<wire x1="9.49125" y1="1.6775" x2="9.49125" y2="3.1775" width="0.127" layer="21"/>
+<wire x1="9.49125" y1="3.6775" x2="9.49125" y2="5.33625" width="0.127" layer="21"/>
+<wire x1="9.49125" y1="5.83625" x2="9.49125" y2="7.4" width="0.127" layer="21"/>
+<wire x1="9.49125" y1="7.9" x2="9.49125" y2="8.6975" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="7.9" x2="-10.16" y2="7.4" width="0.127" layer="21" curve="-180"/>
+<wire x1="9.49125" y1="7.4" x2="9.49125" y2="7.9" width="0.127" layer="21" curve="-180"/>
+<wire x1="-7.62" y1="8.255" x2="-7.62" y2="3.4925" width="0.127" layer="21"/>
+<wire x1="-7.62" y1="3.4925" x2="5.715" y2="3.4925" width="0.127" layer="21"/>
+<wire x1="5.715" y1="3.4925" x2="5.715" y2="8.255" width="0.127" layer="21"/>
+<wire x1="5.715" y1="8.255" x2="-7.62" y2="8.255" width="0.127" layer="21"/>
+<wire x1="-7.14375" y1="-0.3175" x2="-7.14375" y2="-3.96875" width="0.127" layer="21"/>
+<wire x1="-7.14375" y1="-3.96875" x2="-3.65125" y2="-3.96875" width="0.127" layer="21"/>
+<wire x1="-3.65125" y1="-3.81" x2="-3.65125" y2="-0.3175" width="0.127" layer="21"/>
+<wire x1="-3.65125" y1="-0.3175" x2="-7.14375" y2="-0.3175" width="0.127" layer="21"/>
+<smd name="RESET" x="-10.16" y="7.65" dx="4" dy="1.0668" layer="1"/>
+<smd name="DIO0" x="-10.16" y="5.65" dx="4" dy="1.0668" layer="1"/>
+<smd name="DIO2" x="-10.16" y="1.4275" dx="4" dy="1.0668" layer="1"/>
+<smd name="DIO3" x="-10.16" y="-0.73125" dx="4" dy="1.0668" layer="1"/>
+<smd name="DIO4" x="-10.16" y="-2.73125" dx="4" dy="1.0668" layer="1"/>
+<smd name="DIO5" x="-10.16" y="-4.73125" dx="4" dy="1.0668" layer="1"/>
+<smd name="VCC" x="-10.16" y="-6.5725" dx="4" dy="1.0668" layer="1"/>
+<smd name="GNDB" x="9.49125" y="-6.5725" dx="4" dy="1.0668" layer="1"/>
+<smd name="ANT" x="9.49125" y="-4.73125" dx="4" dy="1.0668" layer="1"/>
+<smd name="GNDA" x="9.49125" y="-2.73125" dx="4" dy="1.0668" layer="1"/>
+<smd name="SCK" x="9.49125" y="-0.5725" dx="4" dy="1.0668" layer="1"/>
+<smd name="MISO" x="9.49125" y="1.4275" dx="4" dy="1.0668" layer="1"/>
+<smd name="MOSI" x="9.49125" y="3.4275" dx="4" dy="1.0668" layer="1"/>
+<smd name="NSS" x="9.49125" y="5.58625" dx="4" dy="1.0668" layer="1"/>
+<smd name="NC" x="9.49125" y="7.71375" dx="4" dy="1.0668" layer="1"/>
+<smd name="DIO1" x="-10.16" y="3.5225" dx="4" dy="1.0668" layer="1"/>
+<text x="-7.14375" y="9.68375" size="1.778" layer="25">&gt;NAME</text>
+<text x="-7.62" y="-10.31875" size="1.778" layer="27">&gt;VALUE</text>
+<text x="-4.72" y="5.34875" size="1.27" layer="21">RFM69HW</text>
+</package>
 </packages>
 <symbols>
 <symbol name="A2235-H">
@@ -8237,6 +8302,28 @@ Source: MC-306_405_406_E07X.PDF</description>
 <text x="1.524" y="-1.143" size="0.8636" layer="93">2</text>
 <pin name="2" x="2.54" y="0" visible="off" length="point" direction="pas" swaplevel="1" rot="R180"/>
 <pin name="1" x="-2.54" y="0" visible="off" length="point" direction="pas" swaplevel="1"/>
+</symbol>
+<symbol name="RFM69HW">
+<wire x1="-13.97" y1="20.32" x2="-13.97" y2="-20.32" width="0.254" layer="94"/>
+<wire x1="-13.97" y1="-20.32" x2="13.97" y2="-20.32" width="0.254" layer="94"/>
+<wire x1="13.97" y1="-20.32" x2="13.97" y2="20.32" width="0.254" layer="94"/>
+<wire x1="13.97" y1="20.32" x2="-13.97" y2="20.32" width="0.254" layer="94"/>
+<pin name="RESET" x="-19.05" y="17.78" length="middle"/>
+<pin name="DIO0" x="-19.05" y="12.7" length="middle"/>
+<pin name="DIO1" x="-19.05" y="7.62" length="middle"/>
+<pin name="DIO2" x="-19.05" y="2.54" length="middle"/>
+<pin name="DIO3" x="-19.05" y="-2.54" length="middle"/>
+<pin name="DIO4" x="-19.05" y="-7.62" length="middle"/>
+<pin name="DIO5" x="-19.05" y="-12.7" length="middle"/>
+<pin name="VCC" x="-19.05" y="-17.78" length="middle"/>
+<pin name="GNDB" x="19.05" y="-17.78" length="middle" rot="R180"/>
+<pin name="ANT" x="19.05" y="-12.7" length="middle" rot="R180"/>
+<pin name="GNDA" x="19.05" y="-7.62" length="middle" rot="R180"/>
+<pin name="SCK" x="19.05" y="-2.54" length="middle" rot="R180"/>
+<pin name="MISO" x="19.05" y="2.54" length="middle" rot="R180"/>
+<pin name="MOSI" x="19.05" y="7.62" length="middle" rot="R180"/>
+<pin name="NSS" x="19.05" y="12.7" length="middle" rot="R180"/>
+<pin name="NC" x="19.05" y="17.78" length="middle" rot="R180"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -8296,101 +8383,6 @@ Source: MC-306_405_406_E07X.PDF &lt;a href="http://www.epsontoyocom.co.jp"&gt; H
 </device>
 </devices>
 </deviceset>
-</devicesets>
-</library>
-<library name="hoperf">
-<packages>
-<package name="RFM">
-<wire x1="-10.16" y1="8.6975" x2="9.49125" y2="8.6975" width="0.127" layer="21"/>
-<wire x1="-10.16" y1="-7.62" x2="9.49125" y2="-7.62" width="0.127" layer="21"/>
-<wire x1="-10.16" y1="-6.3225" x2="-10.16" y2="-6.8225" width="0.127" layer="21" curve="-180"/>
-<wire x1="-10.16" y1="-4.48125" x2="-10.16" y2="-4.98125" width="0.127" layer="21" curve="-180"/>
-<wire x1="-10.16" y1="-2.48125" x2="-10.16" y2="-2.98125" width="0.127" layer="21" curve="-180"/>
-<wire x1="-10.16" y1="-0.48125" x2="-10.16" y2="-0.98125" width="0.127" layer="21" curve="-180"/>
-<wire x1="-10.16" y1="1.6775" x2="-10.16" y2="1.1775" width="0.127" layer="21" curve="-180"/>
-<wire x1="-10.16" y1="3.6775" x2="-10.16" y2="3.1775" width="0.127" layer="21" curve="-180"/>
-<wire x1="-10.16" y1="5.83625" x2="-10.16" y2="5.33625" width="0.127" layer="21" curve="-180"/>
-<wire x1="-10.16" y1="-7.62" x2="-10.16" y2="-6.8225" width="0.127" layer="21"/>
-<wire x1="-10.16" y1="-6.3225" x2="-10.16" y2="-4.98125" width="0.127" layer="21"/>
-<wire x1="-10.16" y1="-4.48125" x2="-10.16" y2="-2.98125" width="0.127" layer="21"/>
-<wire x1="-10.16" y1="-2.48125" x2="-10.16" y2="-0.98125" width="0.127" layer="21"/>
-<wire x1="-10.16" y1="-0.48125" x2="-10.16" y2="1.1775" width="0.127" layer="21"/>
-<wire x1="-10.16" y1="1.6775" x2="-10.16" y2="3.1775" width="0.127" layer="21"/>
-<wire x1="-10.16" y1="3.6775" x2="-10.16" y2="5.33625" width="0.127" layer="21"/>
-<wire x1="-10.16" y1="5.83625" x2="-10.16" y2="7.4" width="0.127" layer="21"/>
-<wire x1="-10.16" y1="7.9" x2="-10.16" y2="8.6975" width="0.127" layer="21"/>
-<wire x1="9.49125" y1="-6.8225" x2="9.49125" y2="-6.3225" width="0.127" layer="21" curve="-180"/>
-<wire x1="9.49125" y1="-4.98125" x2="9.49125" y2="-4.48125" width="0.127" layer="21" curve="-180"/>
-<wire x1="9.49125" y1="-2.98125" x2="9.49125" y2="-2.48125" width="0.127" layer="21" curve="-180"/>
-<wire x1="9.49125" y1="-0.8225" x2="9.49125" y2="-0.3225" width="0.127" layer="21" curve="-180"/>
-<wire x1="9.49125" y1="1.1775" x2="9.49125" y2="1.6775" width="0.127" layer="21" curve="-180"/>
-<wire x1="9.49125" y1="3.1775" x2="9.49125" y2="3.6775" width="0.127" layer="21" curve="-180"/>
-<wire x1="9.49125" y1="5.33625" x2="9.49125" y2="5.83625" width="0.127" layer="21" curve="-180"/>
-<wire x1="9.49125" y1="-7.62" x2="9.49125" y2="-6.8225" width="0.127" layer="21"/>
-<wire x1="9.49125" y1="-6.3225" x2="9.49125" y2="-4.98125" width="0.127" layer="21"/>
-<wire x1="9.49125" y1="-4.48125" x2="9.49125" y2="-2.98125" width="0.127" layer="21"/>
-<wire x1="9.49125" y1="-2.48125" x2="9.49125" y2="-0.8225" width="0.127" layer="21"/>
-<wire x1="9.49125" y1="-0.3225" x2="9.49125" y2="1.1775" width="0.127" layer="21"/>
-<wire x1="9.49125" y1="1.6775" x2="9.49125" y2="3.1775" width="0.127" layer="21"/>
-<wire x1="9.49125" y1="3.6775" x2="9.49125" y2="5.33625" width="0.127" layer="21"/>
-<wire x1="9.49125" y1="5.83625" x2="9.49125" y2="7.4" width="0.127" layer="21"/>
-<wire x1="9.49125" y1="7.9" x2="9.49125" y2="8.6975" width="0.127" layer="21"/>
-<wire x1="-10.16" y1="7.9" x2="-10.16" y2="7.4" width="0.127" layer="21" curve="-180"/>
-<wire x1="9.49125" y1="7.4" x2="9.49125" y2="7.9" width="0.127" layer="21" curve="-180"/>
-<wire x1="-7.62" y1="8.255" x2="-7.62" y2="3.4925" width="0.127" layer="21"/>
-<wire x1="-7.62" y1="3.4925" x2="5.715" y2="3.4925" width="0.127" layer="21"/>
-<wire x1="5.715" y1="3.4925" x2="5.715" y2="8.255" width="0.127" layer="21"/>
-<wire x1="5.715" y1="8.255" x2="-7.62" y2="8.255" width="0.127" layer="21"/>
-<wire x1="-7.14375" y1="-0.3175" x2="-7.14375" y2="-3.96875" width="0.127" layer="21"/>
-<wire x1="-7.14375" y1="-3.96875" x2="-3.65125" y2="-3.96875" width="0.127" layer="21"/>
-<wire x1="-3.65125" y1="-3.81" x2="-3.65125" y2="-0.3175" width="0.127" layer="21"/>
-<wire x1="-3.65125" y1="-0.3175" x2="-7.14375" y2="-0.3175" width="0.127" layer="21"/>
-<smd name="RESET" x="-10.16" y="7.65" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="DIO0" x="-10.16" y="5.65" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="DIO2" x="-10.16" y="1.4275" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="DIO3" x="-10.16" y="-0.73125" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="DIO4" x="-10.16" y="-2.73125" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="DIO5" x="-10.16" y="-4.73125" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="VCC" x="-10.16" y="-6.5725" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="GNDB" x="9.49125" y="-6.5725" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="ANT" x="9.49125" y="-4.73125" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="GNDA" x="9.49125" y="-2.73125" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="SCK" x="9.49125" y="-0.5725" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="MISO" x="9.49125" y="1.4275" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="MOSI" x="9.49125" y="3.4275" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="NSS" x="9.49125" y="5.58625" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="NC" x="9.49125" y="7.71375" dx="2.1844" dy="1.0668" layer="1"/>
-<smd name="DIO1" x="-10.16" y="3.5225" dx="2.1844" dy="1.0668" layer="1"/>
-<text x="-7.14375" y="9.68375" size="1.778" layer="25">&gt;NAME</text>
-<text x="-7.62" y="-10.31875" size="1.778" layer="27">&gt;VALUE</text>
-<text x="-4.72" y="5.34875" size="1.27" layer="21">RFM69HW</text>
-</package>
-</packages>
-<symbols>
-<symbol name="RFM69HW">
-<wire x1="-13.97" y1="20.32" x2="-13.97" y2="-20.32" width="0.254" layer="94"/>
-<wire x1="-13.97" y1="-20.32" x2="13.97" y2="-20.32" width="0.254" layer="94"/>
-<wire x1="13.97" y1="-20.32" x2="13.97" y2="20.32" width="0.254" layer="94"/>
-<wire x1="13.97" y1="20.32" x2="-13.97" y2="20.32" width="0.254" layer="94"/>
-<pin name="RESET" x="-19.05" y="17.78" length="middle"/>
-<pin name="DIO0" x="-19.05" y="12.7" length="middle"/>
-<pin name="DIO1" x="-19.05" y="7.62" length="middle"/>
-<pin name="DIO2" x="-19.05" y="2.54" length="middle"/>
-<pin name="DIO3" x="-19.05" y="-2.54" length="middle"/>
-<pin name="DIO4" x="-19.05" y="-7.62" length="middle"/>
-<pin name="DIO5" x="-19.05" y="-12.7" length="middle"/>
-<pin name="VCC" x="-19.05" y="-17.78" length="middle"/>
-<pin name="GNDB" x="19.05" y="-17.78" length="middle" rot="R180"/>
-<pin name="ANT" x="19.05" y="-12.7" length="middle" rot="R180"/>
-<pin name="GNDA" x="19.05" y="-7.62" length="middle" rot="R180"/>
-<pin name="SCK" x="19.05" y="-2.54" length="middle" rot="R180"/>
-<pin name="MISO" x="19.05" y="2.54" length="middle" rot="R180"/>
-<pin name="MOSI" x="19.05" y="7.62" length="middle" rot="R180"/>
-<pin name="NSS" x="19.05" y="12.7" length="middle" rot="R180"/>
-<pin name="NC" x="19.05" y="17.78" length="middle" rot="R180"/>
-</symbol>
-</symbols>
-<devicesets>
 <deviceset name="RFM69HW">
 <gates>
 <gate name="A" symbol="RFM69HW" x="0" y="10.16"/>
@@ -8478,7 +8470,6 @@ Source: MC-306_405_406_E07X.PDF &lt;a href="http://www.epsontoyocom.co.jp"&gt; H
 <part name="+3V1" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND2" library="supply1" deviceset="GND" device=""/>
 <part name="+3V2" library="supply1" deviceset="+3V3" device=""/>
-<part name="U$1" library="hoperf" deviceset="RFM69HW" device=""/>
 <part name="GND4" library="supply1" deviceset="GND" device=""/>
 <part name="R3" library="rcl" deviceset="R-EU_" device="R0603"/>
 <part name="GND10" library="supply1" deviceset="GND" device=""/>
@@ -8575,6 +8566,7 @@ Source: MC-306_405_406_E07X.PDF &lt;a href="http://www.epsontoyocom.co.jp"&gt; H
 <part name="R2" library="rcl" deviceset="R-EU_" device="R0603"/>
 <part name="R10" library="rcl" deviceset="R-EU_" device="R0603"/>
 <part name="R14" library="rcl" deviceset="R-EU_" device="R0603"/>
+<part name="U$5" library="gps_tracker" deviceset="RFM69HW" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -8588,7 +8580,6 @@ Source: MC-306_405_406_E07X.PDF &lt;a href="http://www.epsontoyocom.co.jp"&gt; H
 <instance part="+3V1" gate="G$1" x="-10.16" y="71.12"/>
 <instance part="GND2" gate="1" x="78.74" y="91.44"/>
 <instance part="+3V2" gate="G$1" x="33.02" y="91.44" rot="R180"/>
-<instance part="U$1" gate="A" x="55.88" y="116.84"/>
 <instance part="GND4" gate="1" x="0" y="0"/>
 <instance part="R3" gate="G$1" x="220.98" y="121.92" rot="R90"/>
 <instance part="GND10" gate="1" x="271.78" y="93.98"/>
@@ -8685,6 +8676,7 @@ Source: MC-306_405_406_E07X.PDF &lt;a href="http://www.epsontoyocom.co.jp"&gt; H
 <instance part="R2" gate="G$1" x="175.26" y="172.72" rot="R90"/>
 <instance part="R10" gate="G$1" x="284.48" y="157.48"/>
 <instance part="R14" gate="G$1" x="284.48" y="137.16"/>
+<instance part="U$5" gate="A" x="55.88" y="116.84"/>
 </instances>
 <busses>
 </busses>
@@ -8707,8 +8699,8 @@ Source: MC-306_405_406_E07X.PDF &lt;a href="http://www.epsontoyocom.co.jp"&gt; H
 <wire x1="74.93" y1="109.22" x2="78.74" y2="109.22" width="0.1524" layer="91"/>
 <wire x1="78.74" y1="109.22" x2="78.74" y2="99.06" width="0.1524" layer="91"/>
 <junction x="78.74" y="99.06"/>
-<pinref part="U$1" gate="A" pin="GNDB"/>
-<pinref part="U$1" gate="A" pin="GNDA"/>
+<pinref part="U$5" gate="A" pin="GNDB"/>
+<pinref part="U$5" gate="A" pin="GNDA"/>
 </segment>
 <segment>
 <pinref part="U2" gate="U$1" pin="GND@5"/>
@@ -8873,7 +8865,7 @@ Source: MC-306_405_406_E07X.PDF &lt;a href="http://www.epsontoyocom.co.jp"&gt; H
 <pinref part="+3V2" gate="G$1" pin="+3V3"/>
 <wire x1="36.83" y1="99.06" x2="33.02" y2="99.06" width="0.1524" layer="91"/>
 <wire x1="33.02" y1="99.06" x2="33.02" y2="93.98" width="0.1524" layer="91"/>
-<pinref part="U$1" gate="A" pin="VCC"/>
+<pinref part="U$5" gate="A" pin="VCC"/>
 </segment>
 <segment>
 <pinref part="U2" gate="U$1" pin="AVCC"/>
@@ -9030,7 +9022,7 @@ Source: MC-306_405_406_E07X.PDF &lt;a href="http://www.epsontoyocom.co.jp"&gt; H
 <segment>
 <wire x1="78.74" y1="114.3" x2="74.93" y2="114.3" width="0.1524" layer="91"/>
 <label x="78.74" y="114.3" size="1.778" layer="95" xref="yes"/>
-<pinref part="U$1" gate="A" pin="SCK"/>
+<pinref part="U$5" gate="A" pin="SCK"/>
 </segment>
 </net>
 <net name="MISO1" class="0">
@@ -9043,7 +9035,7 @@ Source: MC-306_405_406_E07X.PDF &lt;a href="http://www.epsontoyocom.co.jp"&gt; H
 <segment>
 <wire x1="78.74" y1="119.38" x2="74.93" y2="119.38" width="0.1524" layer="91"/>
 <label x="78.74" y="119.38" size="1.778" layer="95" xref="yes"/>
-<pinref part="U$1" gate="A" pin="MISO"/>
+<pinref part="U$5" gate="A" pin="MISO"/>
 </segment>
 </net>
 <net name="MOSI1" class="0">
@@ -9056,14 +9048,14 @@ Source: MC-306_405_406_E07X.PDF &lt;a href="http://www.epsontoyocom.co.jp"&gt; H
 <segment>
 <wire x1="78.74" y1="124.46" x2="74.93" y2="124.46" width="0.1524" layer="91"/>
 <label x="78.74" y="124.46" size="1.778" layer="95" xref="yes"/>
-<pinref part="U$1" gate="A" pin="MOSI"/>
+<pinref part="U$5" gate="A" pin="MOSI"/>
 </segment>
 </net>
 <net name="!CS1" class="0">
 <segment>
 <label x="78.74" y="129.54" size="1.778" layer="95" xref="yes"/>
-<pinref part="U$1" gate="A" pin="NSS"/>
 <wire x1="74.93" y1="129.54" x2="78.74" y2="129.54" width="0.1524" layer="91"/>
+<pinref part="U$5" gate="A" pin="NSS"/>
 </segment>
 <segment>
 <pinref part="U2" gate="U$1" pin="PB1(OC1A)"/>
@@ -9080,14 +9072,14 @@ Source: MC-306_405_406_E07X.PDF &lt;a href="http://www.epsontoyocom.co.jp"&gt; H
 <segment>
 <pinref part="ANT" gate="1" pin="P"/>
 <wire x1="83.82" y1="104.14" x2="74.93" y2="104.14" width="0.1524" layer="91"/>
-<pinref part="U$1" gate="A" pin="ANT"/>
+<pinref part="U$5" gate="A" pin="ANT"/>
 </segment>
 </net>
 <net name="!RF_RES1" class="0">
 <segment>
 <label x="33.02" y="134.62" size="1.778" layer="95" rot="R180" xref="yes"/>
-<pinref part="U$1" gate="A" pin="RESET"/>
 <wire x1="36.83" y1="134.62" x2="33.02" y2="134.62" width="0.1524" layer="91"/>
+<pinref part="U$5" gate="A" pin="RESET"/>
 </segment>
 <segment>
 <wire x1="50.8" y1="33.02" x2="53.34" y2="33.02" width="0.1524" layer="91"/>
@@ -9098,8 +9090,8 @@ Source: MC-306_405_406_E07X.PDF &lt;a href="http://www.epsontoyocom.co.jp"&gt; H
 <net name="RF_RTTY1" class="0">
 <segment>
 <label x="33.02" y="119.38" size="1.778" layer="95" rot="R180" xref="yes"/>
-<pinref part="U$1" gate="A" pin="DIO2"/>
 <wire x1="36.83" y1="119.38" x2="33.02" y2="119.38" width="0.1524" layer="91"/>
+<pinref part="U$5" gate="A" pin="DIO2"/>
 </segment>
 <segment>
 <wire x1="50.8" y1="58.42" x2="60.96" y2="58.42" width="0.1524" layer="91"/>

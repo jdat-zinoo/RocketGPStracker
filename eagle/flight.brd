@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.635" unitdist="mm" unit="mm" style="lines" multiple="1" display="yes" altdistance="0.025" altunitdist="inch" altunit="mm"/>
+<grid distance="0.3715" unitdist="mm" unit="mm" style="lines" multiple="1" display="yes" altdistance="0.025" altunitdist="inch" altunit="mm"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -2736,7 +2736,7 @@ design rules under a new name.</description>
 <elements>
 <element name="C51" library="rcl" package="C0603" value="100nF" x="9.520321875" y="17.809103125" rot="MR0"/>
 <element name="C52" library="rcl" package="C1206" value="" x="11.76285" y="7.234159375" rot="R270"/>
-<element name="C53" library="rcl" package="C0603" value="" x="3.837490625" y="9.4518625" rot="R90"/>
+<element name="C53" library="rcl" package="C0603" value="" x="3.465990625" y="9.4518625" rot="R90"/>
 <element name="C54" library="rcl" package="C0603" value="" x="14.465740625" y="17.839034375" rot="R90"/>
 <element name="IC2" library="freetronics-original" package="MS5637" value="MS563702BA03" x="9.520321875" y="15.269103125" rot="MR0"/>
 <element name="LED10" library="led" package="CHIPLED_0805" value="" x="19.683859375" y="2.888909375" rot="R270"/>
@@ -2862,7 +2862,7 @@ design rules under a new name.</description>
 <contactref element="Q2" pad="2"/>
 <contactref element="CAM_ENA" pad="2"/>
 <wire x1="3.175" y1="14.605" x2="2.54" y2="15.875" width="0.5" layer="1"/>
-<wire x1="3.837490625" y1="10.3018625" x2="3.837490625" y2="10.767509375" width="0.5" layer="1"/>
+<wire x1="3.465990625" y1="10.3018625" x2="3.837490625" y2="10.767509375" width="0.5" layer="1"/>
 <wire x1="3.837490625" y1="10.767509375" x2="3.175" y2="11.43" width="0.5" layer="1"/>
 <wire x1="14.283690625" y1="5.42993125" x2="14.27913125" y2="5.42405" width="0" layer="19" extent="1-1"/>
 </signal>
@@ -3041,7 +3041,7 @@ design rules under a new name.</description>
 <contactref element="R47" pad="2"/>
 <contactref element="C53" pad="1"/>
 <contactref element="TP2" pad="TP"/>
-<wire x1="3.837490625" y1="8.6018625" x2="4.940321875" y2="8.6018625" width="0.5" layer="1"/>
+<wire x1="3.465990625" y1="8.6018625" x2="4.940321875" y2="8.6018625" width="0.5" layer="1"/>
 <wire x1="4.940321875" y1="8.6018625" x2="4.940321875" y2="8.769103125" width="0.5" layer="1"/>
 <wire x1="6.345321875" y1="4.905903125" x2="6.345321875" y2="5.304103125" width="0.5" layer="1"/>
 <wire x1="6.345321875" y1="5.304103125" x2="4.995321875" y2="6.654103125" width="0.5" layer="1"/>
@@ -3169,6 +3169,22 @@ design rules under a new name.</description>
 <wire x1="3.81" y1="13.385" x2="4.13" y2="13.065" width="0.5" layer="16"/>
 <wire x1="3.595" y1="9.525" x2="3.595" y2="12.53" width="0.5" layer="16"/>
 <wire x1="3.595" y1="12.53" x2="4.13" y2="13.065" width="0.5" layer="16"/>
+</signal>
+<signal name="N$5">
+<polygon width="0.01" layer="1" isolate="0.01">
+<vertex x="0.635" y="23.495"/>
+<vertex x="3.81" y="23.495"/>
+<vertex x="3.81" y="20.955"/>
+<vertex x="0.635" y="20.955"/>
+</polygon>
+</signal>
+<signal name="N$6">
+<polygon width="0.01" layer="16" isolate="0.01">
+<vertex x="0.635" y="20.955"/>
+<vertex x="3.81" y="20.955"/>
+<vertex x="3.81" y="23.495"/>
+<vertex x="0.635" y="23.495"/>
+</polygon>
 </signal>
 </signals>
 </board>
