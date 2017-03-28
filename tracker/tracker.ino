@@ -46,14 +46,18 @@ const  uint8_t minSats=3;       //minimums Satelittes in GPS view for good fix
   #endif
 #endif
 
+// Not avialable now.
+// Manual settings in registers
+// for A2235H 433.92
+// for A2235H 433.95
 //frequnecy depends on GPS module to not intrefer with each other
-#ifdef org1411
-  #define frequency 433.95f
-#endif
-
-#ifdef a2235h
-  #define frequency 433.92f
-#endif
+//#ifdef org1411
+//  #define frequency 435.02f
+//#endif
+//
+//#ifdef a2235h
+//  #define frequency 433.92f
+//#endif
 
 
 #include "fsk.h"
@@ -110,6 +114,10 @@ unsigned char numSats;
 //TinyGPS gps;
 
 #ifdef org1411
+  //#include "SirfGPS.h"  
+  //SirfGPS gps;
+  #include "TinyGPS.h"
+  TinyGPS gps;
   //const char sirfBaud[]={0xA0, 0xA2, 0x00, 0x09, 0x86, 0x00, 0x00, 0x25, 0x80, 0x08, 0x01, 0x00, 0x00, 0x01, 0x34, 0xB0, 0xB3};
   //const char sirfNMEA[]={0xA0, 0xA2, 0x00, 0x02, 0x87, 0x02, 0x00, 0x89, 0xB0, 0xB3};
 #endif
@@ -128,10 +136,11 @@ void setup()
 
 // GPS module dependent initialisation
 #ifdef org1411
+  //Serial.flush();
   //Serial.begin(115200);
   //Serial.write(sirfBaud,sizeof(sirfBaud));
-  //Serial.flush();
-  //Serial.begin(4800);
+  Serial.flush();
+  Serial.begin(4800);
   //Serial.write(sirfBaud,sizeof(sirfBaud));  
   //Serial.write(sirfNMEA,sizeof(sirfNMEA));
 #endif
@@ -172,7 +181,19 @@ void setup()
 
   //init radio with libary functions
   radio.initialize();  
-  radio.setFrequencyMHz(frequency);  
+  //radio.setFrequencyMHz(frequency);  
+#ifdef org1411
+  radio.writeReg(REG_FRFMSB,0x6C);
+  radio.writeReg(REG_FRFMID,0x7C);
+  radio.writeReg(REG_FRFLSB,0xCC);
+#endif  
+
+#ifdef a2235h 
+  radio.writeReg(REG_FRFMSB,0x6C);
+  radio.writeReg(REG_FRFMID,0x7A);
+  radio.writeReg(REG_FRFLSB,0xE1);
+#endif  
+
   // +/- deviation freq = 61*register (6*61=366Hz, RTTY FSK shift=732 hz
   radio.writeReg(REG_FDEVMSB,0);
   radio.writeReg(REG_FDEVLSB,6);      
