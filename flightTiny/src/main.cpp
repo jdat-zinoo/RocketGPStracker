@@ -36,6 +36,7 @@ const int kLOG_SIZE = 160;      // 3 bytes per entry
 
 const int kSERVO_PERIOD_MS  = 20;
 const int kSERVO_ON_US      = 1250;
+const int kSERVO_ON_mS      = 1000;
 const int kSERVO_OFF_US     = 550;
 
 const uint8_t kTIMER1_DIV512  = 0b1010;
@@ -47,10 +48,11 @@ DigitalOut<PortB::pin3> pyro;
 DigitalOut<PortB::pin1> buzzer;
 
 //
-DigitalOut<PortB::pin0> test;
+//DigitalOut<PortB::pin0> test;
 
 #if DEBUG
   TextOutStream<SoftwareSerialOut<DigitalOut<PortB::pin4>, 9600> > dbg;
+  //TextOutStream<NullOutput> dbg;
 #else
   TextOutStream<NullOutput> dbg;
 #endif
@@ -230,10 +232,13 @@ void loop()
         << " (max " << gMaxAltitude << "/" << (const char *)gMessage << ")"
         << " * " << mx << " / " << my << " / " << mz << " | " << gZeroY << endl;
 */
-    dbg << pressureComp << " / " << gAltitude
-      << " * " << my << " | " << gZeroY << " / " << gState << endl;
+/*
+    dbg << "Press: " <<pressureComp << " Alt: " << gAltitude
+      << " * MagY: " << my << " | MagZero: " << gZeroY << " / State: " << gState << endl;
+*/
+//dbg << mx << "," << my << "," << mz << "," << gZeroY << endl;
 
-    bool doEject = magOK && (my > gZeroY);
+    bool doEject = magOK && (my < gZeroY);
 
     if (gState == kSTATE_SAFE) {
       // SAFE state
@@ -284,14 +289,14 @@ void loop()
 
           pyroPhase = !pyroPhase;   // alternate between on/off states
           gPyroOn = pyroPhase;
-          pyroTimer = 25;
+          pyroTimer = 125;
         }
       }
       else {
         pyroPhase = false;
         if (gPyroOn) {
           gPyroOn = false;
-          pyroTimer = 25;
+          pyroTimer = 125;
         }
       }
 
@@ -306,10 +311,11 @@ void loop()
         gState = kSTATE_SAFE;
         resetCalibration();
         gPyroOn = false;
-        pyroTimer = 25;
+        pyroTimer = 125;
       }
     }
   }
+
 
   if (bit_check(gFlags, kFLAG_SERVO)) {
     bit_clear(gFlags, kFLAG_SERVO);
@@ -318,8 +324,8 @@ void loop()
       pyroTimer--;
 
       pyro.high();
-      if (gPyroOn) _delay_us(kSERVO_ON_US);
-      else _delay_us(kSERVO_OFF_US);
+      if (gPyroOn) _delay_ms(kSERVO_ON_mS);
+      //else _delay_us(kSERVO_OFF_US);
       pyro.low();
     }
     else {
@@ -343,13 +349,13 @@ ISR(TIMER1_COMPA_vect) {
   static uint8_t ditCount;
   static uint8_t ditState;
 
-  if (++cnt1 >= 3) {
+  if (++cnt1 >= 30) {
     cnt1 = 0;
     bit_set(gFlags, kFLAG_SERVO);
   }
 
-  uint8_t measurePeriod = (gState == kSTATE_SAFE) ? 25 : 125;
-  //uint8_t measurePeriod = (gState == kSTATE_SAFE) ? 25 : 25;
+  //uint8_t measurePeriod = (gState == kSTATE_SAFE) ? 25 : 125;
+  uint8_t measurePeriod = (gState == kSTATE_SAFE) ? 25 : 75;
   if (++cnt2 >= measurePeriod) {
     cnt2 = 0;
     bit_set(gFlags, kFLAG_MEASURE);
@@ -417,25 +423,37 @@ ISR(TIMER1_COMPA_vect) {
 
 void calibrate(int16_t mx, int16_t my, int16_t mz)
 {
-  /*
-  static int16_t minx = 32000, miny = 32000, minz = 32000;
-  static int16_t maxx = -32000, maxy = -32000, maxz = -32000;
 
-  if (mx > maxx) maxx = mx;
-  else if (mx < minx) minx = mx;
-  if (my > maxy) maxy = my;
-  else if (my < miny) miny = my;
-  if (mz > maxz) maxz = mz;
-  else if (mz < minz) minz = mz;
+  //static int16_t minx = 32000, miny = 32000, minz = 32000;
+  //static int16_t maxx = -32000, maxy = -32000, maxz = -32000;
 
-  int16_t cx = (minx + maxx) / 2;
-  int16_t cy = (miny + maxy) / 2;
-  int16_t cz = (minz + maxz) / 2;
-  dbg << "Cal: [" << cx << "/" << cy << "/" << cz << "]" << endl;
-  */
+  //if (mx > maxx) maxx = mx;
+  //else if (mx < minx) minx = mx;
+  //if (my > maxy) maxy = my;
+  //else if (my < miny) miny = my;
+  //if (mz > maxz) maxz = mz;
+  //else if (mz < minz) minz = mz;
+
+  //int16_t cx = (minx + maxx) / 2;
+  //int16_t cy = (miny + maxy) / 2;
+  //int16_t cz = (minz + maxz) / 2;
+
+
+  //dbg << "Cal: [" << cx << "/" << cy << "/" << cz << "]" << endl;
+  //dbg << mx << "," << my << "," << mz << "," << cx << "," << cy << "," << cz << endl;
+  //dbg <<  my << ","  << cy  << endl;
+
   if (my < gMinY) gMinY = my;
   if (my > gMaxY) gMaxY = my;
   gZeroY = (gMinY + gMaxY) / 2;
+
+  //int16_t a = (gMinY + gMaxY) / 2;
+  //gZeroY=a+(gMaxY-a)/2;
+
+  //gZeroY=gZeroY+gZeroY/2;
+  //gZeroY = (gMinY + gMaxY) / 4;
+
+  //dbg <<  my << ","  << gZeroY  << endl;
 }
 
 void calibrateBaro(uint16_t pressure)
@@ -469,9 +487,9 @@ bool checkFlightPin() {
   while (bit_check(ADCSRA, ADSC)) {}
   uint16_t adcValue = ADC;
 
-  dbg << "ARM: " << adcValue <<endl;
+  //dbg << "ARM: " << adcValue <<endl;
 
-  result = (adcValue > 100);
+  result = (adcValue > 50);
 
   //pyro.readAnalog();
   pyro.modeOutput();
@@ -488,9 +506,9 @@ bool checkFlightPin() {
 
 void errorHalt() {
   while (true) {
-    led.high();
+    buzzer.high();
     _delay_ms(100);
-    led.low();
+    buzzer.low();
     _delay_ms(100);
   }
 }
@@ -501,11 +519,10 @@ void initSensors() {
     dbg << "Initializing magfield sensor" << endl;
     magReady = magSensor.begin();
     if (magReady) {
-      dbg << "Enabling continuous conversion mode" << endl;
       magSensor.configure1(0b00000001);  //80 Hz sampilg, active mode
       magSensor.configure2(0b10100000);  //auto reset (need test), raw mode
       magSensor.mode(0b00000001);  //active mode RAW
-
+      dbg << "Magnetometer ready" << endl;
       break;
     }
     delay(500);
@@ -531,9 +548,9 @@ void initSensors() {
 
 void initPyro() {
   for (uint8_t cnt = 0; cnt < 25; cnt++) {
-    pyro.high();
+    //pyro.high();
     _delay_us(kSERVO_OFF_US);
-    pyro.low();
+    //pyro.low();
     _delay_ms(kSERVO_PERIOD_MS);
   }
 }
@@ -541,10 +558,10 @@ void initPyro() {
 void testLED()
 {
   led.high();
-  _delay_ms(400);
-  pyro.high();
-  _delay_ms(100);
-  pyro.low();
+  _delay_ms(500);
+  //pyro.high();
+  //_delay_ms(100);
+  //pyro.low();
 
   led.low();
   _delay_ms(1000);
@@ -554,14 +571,14 @@ void flashID(uint8_t id)
 {
   for (uint8_t mask = 0x80; mask > 0; mask >>= 1) {
     if (id & mask) {
-      pyro.high();
+      //pyro.high();
     }
     else {
       led.high();
     }
     _delay_ms(400);
     led.low();
-    pyro.low();
+    //pyro.low();
     _delay_ms(100);
   }
 }
@@ -603,7 +620,7 @@ while (true){
   }
 errorHalt();
 */
-
+/*
 //char s[5];
 byte a;
   for (byte i=8;i<127;i++){
@@ -613,7 +630,7 @@ byte a;
     dbg << "I: " << i << " data: " <<  a <<endl;
   }
   errorHalt();
-
+*/
 }
 
 void clearLog()

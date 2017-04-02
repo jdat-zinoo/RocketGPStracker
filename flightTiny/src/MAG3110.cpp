@@ -79,8 +79,9 @@ bool MAG3110::readWord(uint8_t addr, uint16_t *value) {
 
   if (TinyWireM.available() < 2) return false;
 
-  uint8_t lo = TinyWireM.receive();
   uint8_t hi = TinyWireM.receive();
+  uint8_t lo = TinyWireM.receive();
+  //uint8_t hi = TinyWireM.receive();
   *value = (hi << 8) | lo;
   return true;
 }
