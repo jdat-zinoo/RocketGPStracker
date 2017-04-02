@@ -17,8 +17,8 @@ const  uint16_t maxAge=5000;    //maximum 5 seconds to wait for GPS serial data
 const  uint8_t minSats=3;       //minimums Satelittes in GPS view for good fix
 
 //select GPS module
-#define a2235h
-//#define org1411
+//#define a2235h
+#define org1411
 
 
 
@@ -198,6 +198,11 @@ void setup()
   radio.writeReg(REG_FDEVMSB,0);
   radio.writeReg(REG_FDEVLSB,6);      
 
+  radio.writeReg(REG_PARAMP,0);
+  //radio.writeReg(REG_PARAMP,0b1111);
+  
+  radio.setPowerLevel(15);
+  
   //rtty pin to output
   sbi(txPort,txPin);
   radio.transmitBegin();
@@ -281,15 +286,20 @@ void loop()
 //timer1 interrupt for beeper stuff
 ISR (TIMER1_COMPA_vect){
   static uint8_t flip;    // local varaible to trace pin state (can be optimized)
+//  if (beepOn==1){  
+//    if (flip==0){
+//      flip=1;      
+//      cbi(beepPort,beepPin); //digitalWrite(pinBeeper,LOW);
+//    } else {
+//      flip=0;      
+//      sbi(beepPort,beepPin); //digitalWrite(pinBeeper,HIGH);    
+//    }
+//  }
   if (beepOn==1){  
-    if (flip==0){
-      flip=1;      
       cbi(beepPort,beepPin); //digitalWrite(pinBeeper,LOW);
     } else {
-      flip=0;      
       sbi(beepPort,beepPin); //digitalWrite(pinBeeper,HIGH);    
     }
-  }
 }
 
 //timer2 interrupt for rtty stuff and 100 ms counter 
