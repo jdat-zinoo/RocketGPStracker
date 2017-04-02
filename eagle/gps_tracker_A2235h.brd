@@ -8,7 +8,7 @@
 </settings>
 <grid distance="0.5" unitdist="mm" unit="mm" style="lines" multiple="1" display="yes" altdistance="0.025" altunitdist="inch" altunit="mm"/>
 <layers>
-<layer number="1" name="Top" color="4" fill="1" visible="no" active="yes"/>
+<layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
 <layer number="3" name="Route3" color="4" fill="3" visible="no" active="no"/>
 <layer number="4" name="Route4" color="1" fill="4" visible="no" active="no"/>
@@ -92,7 +92,7 @@
 <layer number="113" name="ReferenceLS" color="7" fill="1" visible="no" active="no"/>
 <layer number="114" name="Badge_Outline" color="11" fill="1" visible="no" active="no"/>
 <layer number="115" name="ReferenceISLANDS" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="116" name="Patch_BOT" color="9" fill="4" visible="no" active="yes"/>
+<layer number="116" name="centerDrill" color="9" fill="4" visible="yes" active="yes"/>
 <layer number="118" name="Rect_Pads" color="7" fill="1" visible="no" active="no"/>
 <layer number="121" name="_tsilk" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="122" name="_bsilk" color="7" fill="1" visible="yes" active="yes"/>
@@ -172,8 +172,21 @@
 <hole x="33" y="2.5" drill="2"/>
 <hole x="33" y="25.5" drill="2"/>
 <hole x="59.5" y="2.5" drill="2"/>
-<text x="21" y="2" size="1.778" layer="41" font="vector" ratio="15" rot="SR0" align="center">T</text>
-<text x="21" y="2" size="1.778" layer="42" font="vector" ratio="15" rot="MR0" align="center">B</text>
+<hole x="2.223" y="-5.08" drill="3"/>
+<hole x="59.373" y="-4.128" drill="3"/>
+<hole x="2.2225" y="33.9725" drill="3"/>
+<hole x="59.055" y="33.3375" drill="3"/>
+<circle x="2.5" y="25.5" radius="0.612" width="0.875" layer="116"/>
+<circle x="59.5" y="25.5" radius="0.612" width="0.875" layer="116"/>
+<circle x="33" y="2.5" radius="0.612" width="0.875" layer="116"/>
+<circle x="33" y="25.5" radius="0.612" width="0.875" layer="116"/>
+<circle x="59.5" y="2.5" radius="0.612" width="0.875" layer="116"/>
+<circle x="2.223" y="-5.08" radius="0.863" width="1.375" layer="116"/>
+<circle x="59.373" y="-4.128" radius="0.863" width="1.375" layer="116"/>
+<circle x="2.223" y="33.973" radius="0.862" width="1.375" layer="116"/>
+<circle x="59.055" y="33.337" radius="0.862" width="1.375" layer="116"/>
+<text x="18.0975" y="1.27" size="1.27" layer="1" align="center">1</text>
+<text x="18.0975" y="1.27" size="1.27" layer="16" rot="SMR0" align="center">2</text>
 </plain>
 <libraries>
 <library name="SparkFun-DigitalIC">
@@ -1780,19 +1793,19 @@ design rules under a new name.</description>
 <attribute name="PROD_ID" value="IC-09069" x="16.51" y="12.73" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="U3" library="gps_tracker" package="A2235-H" value="A2235-H" x="48.26" y="14.635" rot="R180"/>
-<element name="R3" library="rcl" package="R0603" value="" x="58.42" y="17.175" rot="MR270"/>
+<element name="R3" library="rcl" package="R0603" value="10k" x="58.42" y="17.175" rot="MR270"/>
 <element name="LED1" library="led" package="CHIPLED_0603" value="" x="38.1" y="18.445"/>
-<element name="R4" library="rcl" package="R0603" value="" x="38.1" y="15.27" rot="R90"/>
-<element name="C4" library="rcl" package="C0603" value="" x="55.245" y="17.175" rot="MR0"/>
-<element name="C5" library="rcl" package="C0603" value="" x="55.245" y="15.905" rot="MR0"/>
-<element name="C6" library="rcl" package="C0603" value="" x="55.245" y="18.445" rot="MR0"/>
+<element name="R4" library="rcl" package="R0603" value="220" x="38.1" y="15.27" rot="R90"/>
+<element name="C4" library="rcl" package="C0603" value="10uF" x="55.245" y="17.175" rot="MR0"/>
+<element name="C5" library="rcl" package="C0603" value="100n" x="55.245" y="15.905" rot="MR0"/>
+<element name="C6" library="rcl" package="C0603" value="1n" x="55.245" y="18.445" rot="MR0"/>
 <element name="TXO1" library="wirepad" package="SMD1,27-2,54" value="" x="42.545" y="8.285" rot="MR90"/>
-<element name="C7" library="rcl" package="C0603" value="" x="15.875" y="5.745" rot="R270"/>
-<element name="C8" library="rcl" package="C0603" value="" x="24.13" y="11.46" rot="R270"/>
-<element name="R5" library="rcl" package="R0603" value="" x="22.86" y="11.46" rot="R270"/>
-<element name="C9" library="rcl" package="C0603" value="" x="17.145" y="19.715"/>
-<element name="C10" library="rcl" package="C0603" value="" x="17.145" y="20.985"/>
-<element name="C11" library="rcl" package="C0603" value="" x="14.605" y="5.745" rot="R270"/>
+<element name="C7" library="rcl" package="C0603" value="100n" x="15.875" y="5.745" rot="R270"/>
+<element name="C8" library="rcl" package="C0603" value="100n" x="24.13" y="11.46" rot="R270"/>
+<element name="R5" library="rcl" package="R0603" value="10k" x="22.86" y="11.46" rot="R270"/>
+<element name="C9" library="rcl" package="C0603" value="10uF" x="17.145" y="19.715"/>
+<element name="C10" library="rcl" package="C0603" value="100n" x="17.145" y="20.985"/>
+<element name="C11" library="rcl" package="C0603" value="1n" x="14.605" y="5.745" rot="R270"/>
 <element name="SCK" library="wirepad" package="SMD1,27-2,54" value="" x="11.43" y="7.015" rot="R90"/>
 <element name="MISO" library="wirepad" package="SMD1,27-2,54" value="" x="11.43" y="8.92" rot="R270"/>
 <element name="MOSI" library="wirepad" package="SMD1,27-2,54" value="" x="9.525" y="10.825" rot="R90"/>
@@ -1800,8 +1813,8 @@ design rules under a new name.</description>
 <element name="TXO_" library="wirepad" package="SMD1,27-2,54" value="" x="24.13" y="15.27" rot="R270"/>
 <element name="RXI_1" library="wirepad" package="SMD1,27-2,54" value="" x="29.21204375" y="14.6347" rot="R270"/>
 <element name="ANT" library="wirepad" package="SMD1,27-2,54" value="" x="3.175" y="4.1575" rot="MR270"/>
-<element name="C12" library="rcl" package="C0603" value="" x="10.16" y="22.89"/>
-<element name="C13" library="rcl" package="C0603" value="" x="13.335" y="22.89" rot="R180"/>
+<element name="C12" library="rcl" package="C0603" value="22p" x="10.16" y="22.89"/>
+<element name="C13" library="rcl" package="C0603" value="22p" x="13.335" y="22.89" rot="R180"/>
 <element name="Q1" library="gps_tracker" package="MC-405" value="MC-405" x="11.43" y="20.35" rot="R180">
 <attribute name="OC_FARNELL" value="unknown" x="11.43" y="20.35" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="OC_NEWARK" value="unknown" x="11.43" y="20.35" size="1.778" layer="27" rot="R180" display="off"/>
@@ -1809,45 +1822,46 @@ design rules under a new name.</description>
 <attribute name="MPN" value="" x="11.43" y="20.35" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="FARNELL" value="2508596" x="11.43" y="20.35" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
-<element name="C14" library="rcl" package="C0603" value="" x="22.86" y="20.35" rot="R180"/>
-<element name="C16" library="rcl" package="C0603" value="" x="29.575" y="3.84" rot="MR180"/>
-<element name="C17" library="rcl" package="C0603" value="" x="29.575" y="2.57" rot="MR180"/>
+<element name="C14" library="rcl" package="C0603" value="10uF" x="22.86" y="20.35" rot="R180"/>
+<element name="C16" library="rcl" package="C0603" value="10uF" x="29.575" y="3.84" rot="MR180"/>
+<element name="C17" library="rcl" package="C0603" value="100n" x="29.575" y="2.57" rot="MR180"/>
 <element name="Q2" library="SparkFun-DiscreteSemi" package="SOT23-3" value="" x="4.445" y="22.255" rot="R90">
 <attribute name="PROD_ID" value="TRAN-12988" x="4.445" y="22.255" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
-<element name="R7" library="rcl" package="R0603" value="" x="6.35" y="22.255" rot="R270"/>
-<element name="R8" library="rcl" package="R0603" value="" x="6.35" y="19.715" rot="R270"/>
+<element name="R7" library="rcl" package="R0603" value="100k" x="6.35" y="22.255" rot="R270"/>
+<element name="R8" library="rcl" package="R0603" value="220" x="6.35" y="19.715" rot="R270"/>
 <element name="U5" library="SparkFun-PowerIC" package="SOT23-5" value="ADP160" x="55.245" y="21.62" rot="MR90">
 <attribute name="PROD_ID" value="VREG-11306" x="55.245" y="21.62" size="1.778" layer="28" rot="MR90" display="off"/>
 <attribute name="FARNELL" value="2510377 " x="55.245" y="21.62" size="1.778" layer="28" rot="MR90" display="off"/>
 </element>
-<element name="C18" library="rcl" package="C0603" value="" x="52.07" y="16.54" rot="MR180"/>
-<element name="C19" library="rcl" package="C0603" value="" x="52.07" y="18.445" rot="MR180"/>
+<element name="C18" library="rcl" package="C0603" value="10uF" x="52.07" y="16.54" rot="MR180"/>
+<element name="C19" library="rcl" package="C0603" value="100n" x="52.07" y="18.445" rot="MR180"/>
 <element name="U6" library="SparkFun-PowerIC" package="SOT23-5" value="ADP160" x="22.225" y="22.89" rot="R90">
 <attribute name="PROD_ID" value="VREG-11306" x="22.225" y="22.89" size="1.778" layer="27" rot="R90" display="off"/>
 <attribute name="FARNELL" value="2510377 " x="22.225" y="22.89" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
-<element name="R9" library="rcl" package="R0603" value="" x="52.07" y="21.62" rot="MR90"/>
-<element name="R6" library="rcl" package="R0603" value="" x="25.4" y="22.89" rot="R90"/>
+<element name="R9" library="rcl" package="R0603" value="100k" x="52.07" y="21.62" rot="MR90"/>
+<element name="R6" library="rcl" package="R0603" value="100k" x="25.4" y="22.89" rot="R90"/>
 <element name="U$2" library="headers(2mm)(samtec)" package="1X2" value="1X2" x="25.4" y="20.985" rot="R270"/>
-<element name="R11" library="rcl" package="R0603" value="" x="4.445" y="15.27" rot="R270"/>
-<element name="U$3" library="headers(2mm)(samtec)" package="1X2" value="1X2" x="2.54" y="22.255" rot="R270"/>
+<element name="R11" library="rcl" package="R0603" value="10k" x="4.445" y="15.27" rot="R270"/>
+<element name="U$3" library="headers(2mm)(samtec)" package="1X2" value="1X2" x="2.54" y="20.755" rot="R270"/>
 <element name="U7" library="SparkFun-PowerIC" package="SOT23-5" value="MCP73831" x="20.955" y="22.255" rot="MR270">
 <attribute name="PROD_ID" value="IC-09995" x="20.955" y="22.255" size="1.778" layer="28" rot="MR270" display="off"/>
 <attribute name="FARNELL" value="1834892" x="20.955" y="22.255" size="1.778" layer="28" rot="MR270" display="off"/>
 </element>
-<element name="R12" library="rcl" package="R0603" value="" x="17.78" y="22.255" rot="MR270"/>
-<element name="R13" library="rcl" package="R0603" value="" x="18.415" y="24.795" rot="MR180"/>
+<element name="R12" library="rcl" package="R0603" value="2k7" x="17.78" y="22.255" rot="MR270"/>
+<element name="R13" library="rcl" package="R0603" value="470" x="18.415" y="24.795" rot="MR180"/>
 <element name="LED3" library="led" package="CHIPLED_0603" value="" x="20.955" y="24.795" rot="MR90"/>
 <element name="U$4" library="headers(2mm)(samtec)" package="1X2" value="1X2" x="13.97" y="24.795" rot="MR0"/>
-<element name="C15" library="rcl" package="C0603" value="" x="20.32" y="19.715" rot="MR180"/>
+<element name="C15" library="rcl" package="C0603" value="10uF" x="20.32" y="19.715" rot="MR180"/>
 <element name="RXI1" library="wirepad" package="SMD1,27-2,54" value="" x="38.736021875" y="4.79235" rot="MR90"/>
 <element name="U$9" library="headers(2mm)(samtec)" package="1X2" value="1X2" x="29.846021875" y="23.20735" rot="R180"/>
-<element name="R1" library="rcl" package="R0603" value="" x="33" y="21.30235" rot="R180"/>
-<element name="R2" library="rcl" package="R0603" value="" x="33" y="19.39735" rot="R180"/>
-<element name="R10" library="rcl" package="R0603" value="" x="33" y="16.22235" rot="R180"/>
-<element name="R14" library="rcl" package="R0603" value="" x="33" y="12.41235" rot="R180"/>
+<element name="R1" library="rcl" package="R0603" value="0" x="33" y="21.30235" rot="R180"/>
+<element name="R2" library="rcl" package="R0603" value="0" x="33" y="19.39735" rot="R180"/>
+<element name="R10" library="rcl" package="R0603" value="0" x="33" y="16.22235" rot="R180"/>
+<element name="R14" library="rcl" package="R0603" value="0" x="33" y="12.41235" rot="R180"/>
 <element name="U$5" library="gps_tracker" package="RFM" value="RFM69HW" x="15.24" y="8.92" rot="MR0"/>
+<element name="R15" library="rcl" package="R0603" value="10k" x="4.5" y="19" rot="R270"/>
 </elements>
 <signals>
 <signal name="VOUT">
@@ -1959,7 +1973,11 @@ design rules under a new name.</description>
 <signal name="N$21">
 <contactref element="Q2" pad="3"/>
 <contactref element="U$3" pad="1"/>
-<wire x1="2.54" y1="22.255" x2="3.345" y2="22.255" width="0.5" layer="1"/>
+<contactref element="R15" pad="1"/>
+<wire x1="2.54" y1="20.755" x2="2.54" y2="21.45" width="0.5" layer="1"/>
+<wire x1="2.54" y1="21.45" x2="3.345" y2="22.255" width="0.5" layer="1"/>
+<wire x1="2.54" y1="20.755" x2="3.595" y2="20.755" width="0.5" layer="1"/>
+<wire x1="3.595" y1="20.755" x2="4.5" y2="19.85" width="0.5" layer="1"/>
 </signal>
 <signal name="N$27">
 <contactref element="C6" pad="1"/>
@@ -2161,8 +2179,6 @@ design rules under a new name.</description>
 <wire x1="22.861021875" y1="10.608978125" x2="22.86" y2="10.61" width="0.5" layer="1"/>
 <wire x1="20.8026" y1="10.73" x2="22.74" y2="10.73" width="0.5" layer="1"/>
 <wire x1="22.74" y1="10.73" x2="22.86" y2="10.61" width="0.5" layer="1"/>
-<wire x1="14.51" y1="8.4374" x2="14.51" y2="6.69" width="0.5" layer="1"/>
-<wire x1="14.51" y1="6.69" x2="14.605" y2="6.595" width="0.5" layer="1"/>
 <wire x1="15.31" y1="17.0226" x2="15.31" y2="14.31735" width="0.5" layer="1"/>
 <wire x1="15.31" y1="14.31735" x2="15.31" y2="13.68235" width="0.5" layer="1"/>
 <wire x1="15.31" y1="13.68235" x2="15.31" y2="11.708371875" width="0.5" layer="1"/>
@@ -2175,10 +2191,6 @@ design rules under a new name.</description>
 <wire x1="16.91" y1="17.0226" x2="16.91" y2="14.553371875" width="0.5" layer="1"/>
 <wire x1="16.91" y1="14.553371875" x2="15.546021875" y2="14.553371875" width="0.5" layer="1"/>
 <wire x1="15.546021875" y1="14.553371875" x2="15.31" y2="14.31735" width="0.5" layer="1"/>
-<wire x1="12.2174" y1="13.93" x2="9.913371875" y2="13.93" width="0.5" layer="1"/>
-<wire x1="9.913371875" y1="13.93" x2="7.621021875" y2="16.22235" width="0.5" layer="1"/>
-<wire x1="7.621021875" y1="16.22235" x2="4.54735" y2="16.22235" width="0.5" layer="1"/>
-<wire x1="4.54735" y1="16.22235" x2="4.445" y2="16.12" width="0.5" layer="1"/>
 <wire x1="20.9249" y1="21.94" x2="19.683371875" y2="21.94" width="0.5" layer="1"/>
 <wire x1="19.683371875" y1="21.94" x2="19.051021875" y2="22.57235" width="0.5" layer="1"/>
 <wire x1="19.051021875" y1="22.57235" x2="17.146021875" y2="22.57235" width="0.5" layer="1"/>
@@ -2191,13 +2203,19 @@ design rules under a new name.</description>
 <wire x1="15.31" y1="18.196328125" x2="16.511021875" y2="19.39735" width="0.5" layer="1"/>
 <wire x1="16.511021875" y1="19.39735" x2="16.511021875" y2="19.498978125" width="0.5" layer="1"/>
 <wire x1="16.511021875" y1="19.498978125" x2="16.295" y2="19.715" width="0.5" layer="1"/>
-<wire x1="4.54735" y1="16.22235" x2="4.54735" y2="19.296021875" width="0.5" layer="1"/>
-<wire x1="4.54735" y1="19.296021875" x2="3.811021875" y2="20.03235" width="0.5" layer="1"/>
-<wire x1="3.811021875" y1="20.03235" x2="2.76265" y2="20.03235" width="0.5" layer="1"/>
-<wire x1="2.76265" y1="20.03235" x2="2.54" y2="20.255" width="0.5" layer="1"/>
 <contactref element="U$5" pad="VCC"/>
 <wire x1="25.4" y1="2.3475" x2="28.5025" y2="2.3475" width="0.5" layer="16"/>
 <wire x1="28.5025" y1="2.3475" x2="28.725" y2="2.57" width="0.5" layer="16"/>
+<contactref element="R15" pad="2"/>
+<wire x1="12.2174" y1="13.93" x2="10.07" y2="13.93" width="0.5" layer="1"/>
+<wire x1="10.07" y1="13.93" x2="8" y2="16" width="0.5" layer="1"/>
+<wire x1="8" y1="16" x2="4.565" y2="16" width="0.5" layer="1"/>
+<wire x1="4.565" y1="16" x2="4.445" y2="16.12" width="0.5" layer="1"/>
+<wire x1="4.445" y1="16.12" x2="4.445" y2="18.095" width="0.5" layer="1"/>
+<wire x1="4.445" y1="18.095" x2="4.5" y2="18.15" width="0.5" layer="1"/>
+<wire x1="4.5" y1="18.15" x2="3.145" y2="18.15" width="0.5" layer="1"/>
+<wire x1="3.145" y1="18.15" x2="2.54" y2="18.755" width="0.5" layer="1"/>
+<wire x1="14.51" y1="8.4374" x2="14.605" y2="6.595" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="GND1">
 <contactref element="C5" pad="2"/>
@@ -2348,22 +2366,6 @@ design rules under a new name.</description>
 <wire x1="42.545" y1="8.285" x2="39.053371875" y2="8.285" width="0.5" layer="16"/>
 <wire x1="39.053371875" y1="8.285" x2="38.101021875" y2="9.23735" width="0.5" layer="16"/>
 <wire x1="33.85" y1="12.41235" x2="36.196021875" y2="12.41235" width="0.5" layer="1"/>
-</signal>
-<signal name="N$1">
-<polygon width="0.01" layer="16" isolate="0.01">
-<vertex x="19.5" y="0.5"/>
-<vertex x="22.5" y="0.5"/>
-<vertex x="22.5" y="3.5"/>
-<vertex x="19.5" y="3.5"/>
-</polygon>
-</signal>
-<signal name="N$4">
-<polygon width="0.01" layer="1" isolate="0.01">
-<vertex x="19.5" y="0.5"/>
-<vertex x="22.5" y="0.5"/>
-<vertex x="22.5" y="3.5"/>
-<vertex x="19.5" y="3.5"/>
-</polygon>
 </signal>
 </signals>
 </board>

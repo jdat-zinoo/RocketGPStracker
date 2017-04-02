@@ -8448,32 +8448,32 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </classes>
 <parts>
 <part name="GND3" library="supply1" deviceset="GND" device=""/>
-<part name="R1" library="rcl" deviceset="R-EU_" device="R0603"/>
-<part name="C1" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="R1" library="rcl" deviceset="R-EU_" device="R0603" value="10k"/>
+<part name="C1" library="rcl" deviceset="C-EU" device="C0603" value="10uF"/>
 <part name="LED2" library="led" deviceset="LED" device="CHIPLED_0603"/>
 <part name="U1" library="gps_tracker" deviceset="ORG1411" device=""/>
-<part name="R2" library="rcl" deviceset="R-EU_" device="R0603"/>
+<part name="R2" library="rcl" deviceset="R-EU_" device="R0603" value="220"/>
 <part name="GND5" library="supply1" deviceset="GND" device=""/>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
-<part name="C2" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C2" library="rcl" deviceset="C-EU" device="C0603" value="100n"/>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
-<part name="C3" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C3" library="rcl" deviceset="C-EU" device="C0603" value="1n"/>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
 <part name="U4" library="SparkFun-PowerIC" deviceset="ADP160" device="" value="ADP160">
 <attribute name="FARNELL" value="2510505 "/>
 </part>
 <part name="GND42" library="supply1" deviceset="GND" device=""/>
-<part name="C20" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C20" library="rcl" deviceset="C-EU" device="C0603" value="10uF"/>
 <part name="GND43" library="supply1" deviceset="GND" device=""/>
-<part name="C21" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C21" library="rcl" deviceset="C-EU" device="C0603" value="100n"/>
 <part name="GND44" library="supply1" deviceset="GND" device=""/>
-<part name="R10" library="rcl" deviceset="R-EU_" device="R0603"/>
+<part name="R10" library="rcl" deviceset="R-EU_" device="R0603" value="100k"/>
 <part name="P+1" library="supply1" deviceset="V+" device=""/>
-<part name="R14" library="rcl" deviceset="R-EU_" device="R0603"/>
-<part name="R15" library="rcl" deviceset="R-EU_" device="R0603"/>
-<part name="R16" library="rcl" deviceset="R-EU_" device="R1206"/>
+<part name="R14" library="rcl" deviceset="R-EU_" device="R0603" value="2k2"/>
+<part name="R15" library="rcl" deviceset="R-EU_" device="R0603" value="2k2"/>
+<part name="R16" library="rcl" deviceset="R-EU_" device="R1206" value="2k2"/>
 <part name="P+2" library="supply1" deviceset="V+" device=""/>
-<part name="R17" library="rcl" deviceset="R-EU_" device="R1206"/>
+<part name="R17" library="rcl" deviceset="R-EU_" device="R1206" value="2k2"/>
 <part name="TXOH" library="wirepad" deviceset="SMD2" device=""/>
 <part name="RXIH" library="wirepad" deviceset="SMD2" device=""/>
 <part name="Q3" library="SparkFun-DiscreteSemi" deviceset="MOSFET-NCHANNEL" device="BSS138" value="200mA/50V"/>
@@ -8484,17 +8484,17 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="+3V2" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND4" library="supply1" deviceset="GND" device=""/>
 <part name="+3V5" library="supply1" deviceset="+3V3" device=""/>
-<part name="C7" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C7" library="rcl" deviceset="C-EU" device="C0603" value="100n"/>
 <part name="GND19" library="supply1" deviceset="GND" device=""/>
-<part name="C8" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C8" library="rcl" deviceset="C-EU" device="C0603" value="100n"/>
 <part name="GND20" library="supply1" deviceset="GND" device=""/>
-<part name="R5" library="rcl" deviceset="R-EU_" device="R0603"/>
+<part name="R5" library="rcl" deviceset="R-EU_" device="R0603" value="10k"/>
 <part name="+3V10" library="supply1" deviceset="+3V3" device=""/>
-<part name="C9" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C9" library="rcl" deviceset="C-EU" device="C0603" value="10uF"/>
 <part name="GND21" library="supply1" deviceset="GND" device=""/>
-<part name="C10" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C10" library="rcl" deviceset="C-EU" device="C0603" value="100n"/>
 <part name="GND22" library="supply1" deviceset="GND" device=""/>
-<part name="C11" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C11" library="rcl" deviceset="C-EU" device="C0603" value="1n"/>
 <part name="GND23" library="supply1" deviceset="GND" device=""/>
 <part name="+3V11" library="supply1" deviceset="+3V3" device=""/>
 <part name="+3V12" library="supply1" deviceset="+3V3" device=""/>
@@ -8507,34 +8507,34 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="TXO" library="wirepad" deviceset="SMD2" device=""/>
 <part name="RXI" library="wirepad" deviceset="SMD2" device=""/>
 <part name="ANT" library="wirepad" deviceset="SMD2" device=""/>
-<part name="C12" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C12" library="rcl" deviceset="C-EU" device="C0603" value="22p"/>
 <part name="GND26" library="supply1" deviceset="GND" device=""/>
-<part name="C13" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C13" library="rcl" deviceset="C-EU" device="C0603" value="22p"/>
 <part name="GND27" library="supply1" deviceset="GND" device=""/>
 <part name="GND28" library="supply1" deviceset="GND" device=""/>
 <part name="Q1" library="gps_tracker" deviceset="MC-405" device="">
 <attribute name="FARNELL" value="2508596"/>
 </part>
-<part name="C14" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C14" library="rcl" deviceset="C-EU" device="C0603" value="10uF"/>
 <part name="GND29" library="supply1" deviceset="GND" device=""/>
 <part name="GND32" library="supply1" deviceset="GND" device=""/>
-<part name="C16" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C16" library="rcl" deviceset="C-EU" device="C0603" value="10uF"/>
 <part name="GND33" library="supply1" deviceset="GND" device=""/>
-<part name="C17" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C17" library="rcl" deviceset="C-EU" device="C0603" value="100n"/>
 <part name="GND34" library="supply1" deviceset="GND" device=""/>
 <part name="+3V16" library="supply1" deviceset="+3V3" device=""/>
 <part name="+3V17" library="supply1" deviceset="+3V3" device=""/>
 <part name="Q2" library="SparkFun-DiscreteSemi" deviceset="MOSFET-NCHANNEL" device="AO3404A" value=""/>
 <part name="GND35" library="supply1" deviceset="GND" device=""/>
-<part name="R7" library="rcl" deviceset="R-EU_" device="R0603"/>
+<part name="R7" library="rcl" deviceset="R-EU_" device="R0603" value="100k"/>
 <part name="GND36" library="supply1" deviceset="GND" device=""/>
-<part name="R8" library="rcl" deviceset="R-EU_" device="R0603"/>
+<part name="R8" library="rcl" deviceset="R-EU_" device="R0603" value="220"/>
 <part name="U6" library="SparkFun-PowerIC" deviceset="ADP160" device="" value="ADP160">
 <attribute name="FARNELL" value="2510377 "/>
 </part>
-<part name="R6" library="rcl" deviceset="R-EU_" device="R0603"/>
+<part name="R6" library="rcl" deviceset="R-EU_" device="R0603" value="100k"/>
 <part name="U$2" library="headers(2mm)(samtec)" deviceset="1X2" device=""/>
-<part name="R11" library="rcl" deviceset="R-EU_" device="R0603"/>
+<part name="R11" library="rcl" deviceset="R-EU_" device="R0603" value="10k"/>
 <part name="+3V3" library="supply1" deviceset="+3V3" device=""/>
 <part name="+3V4" library="supply1" deviceset="+3V3" device=""/>
 <part name="U$3" library="headers(2mm)(samtec)" deviceset="1X2" device=""/>
@@ -8542,21 +8542,22 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <attribute name="FARNELL" value="1834892"/>
 </part>
 <part name="GND9" library="supply1" deviceset="GND" device=""/>
-<part name="R12" library="rcl" deviceset="R-EU_" device="R0603"/>
+<part name="R12" library="rcl" deviceset="R-EU_" device="R0603" value="2k7"/>
 <part name="GND30" library="supply1" deviceset="GND" device=""/>
-<part name="R13" library="rcl" deviceset="R-EU_" device="R0603"/>
+<part name="R13" library="rcl" deviceset="R-EU_" device="R0603" value="470"/>
 <part name="LED3" library="led" deviceset="LED" device="CHIPLED_0603"/>
 <part name="U$4" library="headers(2mm)(samtec)" deviceset="1X2" device=""/>
 <part name="GND31" library="supply1" deviceset="GND" device=""/>
-<part name="C15" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C15" library="rcl" deviceset="C-EU" device="C0603" value="10uF"/>
 <part name="GND45" library="supply1" deviceset="GND" device=""/>
 <part name="U$9" library="headers(2mm)(samtec)" deviceset="1X2" device=""/>
 <part name="GND15" library="supply1" deviceset="GND" device=""/>
-<part name="R3" library="rcl" deviceset="R-EU_" device="R0603"/>
-<part name="R4" library="rcl" deviceset="R-EU_" device="R0603"/>
-<part name="R9" library="rcl" deviceset="R-EU_" device="R0603"/>
-<part name="R18" library="rcl" deviceset="R-EU_" device="R0603"/>
+<part name="R3" library="rcl" deviceset="R-EU_" device="R0603" value="0"/>
+<part name="R4" library="rcl" deviceset="R-EU_" device="R0603" value="0"/>
+<part name="R9" library="rcl" deviceset="R-EU_" device="R0603" value="0"/>
+<part name="R18" library="rcl" deviceset="R-EU_" device="R0603" value="0"/>
 <part name="U$5" library="gps_tracker" deviceset="RFM69HW" device=""/>
+<part name="R19" library="rcl" deviceset="R-EU_" device="R0603" value="10k"/>
 </parts>
 <sheets>
 <sheet>
@@ -8673,6 +8674,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <instance part="R9" gate="G$1" x="370.84" y="152.4"/>
 <instance part="R18" gate="G$1" x="332.74" y="180.34"/>
 <instance part="U$5" gate="A" x="223.52" y="142.24"/>
+<instance part="R19" gate="G$1" x="276.86" y="91.44" rot="R90"/>
 </instances>
 <busses>
 </busses>
@@ -9080,7 +9082,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="+3V4" gate="G$1" pin="+3V3"/>
 <pinref part="U$3" gate="G$1" pin="2"/>
 <wire x1="297.18" y1="93.98" x2="284.48" y2="93.98" width="0.1524" layer="91"/>
-<wire x1="284.48" y1="93.98" x2="284.48" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="284.48" y1="93.98" x2="284.48" y2="96.52" width="0.1524" layer="91"/>
+<pinref part="R19" gate="G$1" pin="2"/>
+<wire x1="284.48" y1="96.52" x2="284.48" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="276.86" y1="96.52" x2="284.48" y2="96.52" width="0.1524" layer="91"/>
+<junction x="284.48" y="96.52"/>
 </segment>
 </net>
 <net name="N$12" class="0">
@@ -9265,9 +9271,13 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <net name="N$21" class="0">
 <segment>
 <pinref part="Q2" gate="G$1" pin="D"/>
-<wire x1="284.48" y1="91.44" x2="284.48" y2="83.82" width="0.1524" layer="91"/>
+<wire x1="284.48" y1="91.44" x2="284.48" y2="86.36" width="0.1524" layer="91"/>
 <pinref part="U$3" gate="G$1" pin="1"/>
+<wire x1="284.48" y1="86.36" x2="284.48" y2="83.82" width="0.1524" layer="91"/>
 <wire x1="297.18" y1="91.44" x2="284.48" y2="91.44" width="0.1524" layer="91"/>
+<pinref part="R19" gate="G$1" pin="1"/>
+<wire x1="276.86" y1="86.36" x2="284.48" y2="86.36" width="0.1524" layer="91"/>
+<junction x="284.48" y="86.36"/>
 </segment>
 </net>
 <net name="N$11" class="0">
