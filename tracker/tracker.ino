@@ -17,8 +17,8 @@ const  uint16_t maxAge=5000;    //maximum 5 seconds to wait for GPS serial data
 const  uint8_t minSats=3;       //minimums Satelittes in GPS view for good fix
 
 //select GPS module
-//#define a2235h
-#define org1411
+#define a2235h
+//#define org1411
 
 
 
@@ -296,9 +296,9 @@ ISR (TIMER1_COMPA_vect){
 //    }
 //  }
   if (beepOn==1){  
-      cbi(beepPort,beepPin); //digitalWrite(pinBeeper,LOW);
-    } else {
       sbi(beepPort,beepPin); //digitalWrite(pinBeeper,HIGH);    
+    } else {
+      cbi(beepPort,beepPin); //digitalWrite(pinBeeper,LOW);
     }
 }
 
