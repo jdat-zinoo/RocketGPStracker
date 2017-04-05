@@ -1,10 +1,20 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Configuration
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//const int kBaudRate = 300;
-const int kBaudRate = 50;       //RTTY baud rate
-const int beepFreq=2500;        //beeper tome frequncy
+//select GPS module
+//#define a2235h
+#define org1411
 
+#define maxPower 31   //maximum tx power -18dBm + value
+
+const unsigned long onTx=5;     //transmiiter on time in minutes
+const unsigned long offTx=2;    //transmitter off time in minutes
+
+//const int kBaudRate = 300;      //RTTY baud rate
+const int kBaudRate = 50;       //RTTY baud rate
+const int beepFreq=2500;        //beeper tone frequncy. used only when passive beeper
+
+//Beeper time config
 //when GPS OK
 const uint8_t onTimeGood=10;    //1 sec on
 const uint8_t offTimeGood=50;   //5 sec off
@@ -12,14 +22,6 @@ const uint8_t offTimeGood=50;   //5 sec off
 //when GPS bad
 const uint8_t onTimeBad=5;      //0.5sec on
 const uint8_t offTimeBad=5;     //0.5sec on
-
-const  uint16_t maxAge=5000;    //maximum 5 seconds to wait for GPS serial data
-const  uint8_t minSats=3;       //minimums Satelittes in GPS view for good fix
-
-//select GPS module
-#define a2235h
-//#define org1411
-
 
 
 /*
@@ -49,7 +51,7 @@ const  uint8_t minSats=3;       //minimums Satelittes in GPS view for good fix
 // Not avialable now.
 // Manual settings in registers
 // for A2235H 433.92
-// for A2235H 433.95
+// for ORG1411H 433.95
 //frequnecy depends on GPS module to not intrefer with each other
 //#ifdef org1411
 //  #define frequency 435.02f
@@ -59,10 +61,20 @@ const  uint8_t minSats=3;       //minimums Satelittes in GPS view for good fix
 //  #define frequency 433.92f
 //#endif
 
+#ifdef a2235h
+  const  uint16_t maxAge=30000;    //maximum 5 seconds to wait for GPS serial data
+  const  uint8_t minSats=3;       //minimums Satelittes in GPS view for good fix
+#endif
+
+#ifdef org1411
+  const  uint16_t maxAge=5000;    //maximum 5 seconds to wait for GPS serial data
+  const  uint8_t minSats=3;       //minimums Satelittes in GPS view for good fix
+#endif
 
 #include "fsk.h"
 #include "RFM69OOK.h"
 #include "RFM69OOKregisters.h"
+#include <EEPROM.h>
 
 //const int txpin = A1;     //RTTY pin
 #define txDir DDRC
@@ -77,10 +89,10 @@ const  uint8_t minSats=3;       //minimums Satelittes in GPS view for good fix
 #define radioCsPin 9
 #define radioResetPin 2
 
+
 FSKTransmitter tx;
 
-RFM69OOK radio(radioCsPin,3,true);    //high power +20 dBm
-//RFM69OOK radio(radioCsPin);         //low power +0dBm
+RFM69OOK radio(radioCsPin);
 
 //static uint8_t brDiv;   //for variable baudrate
 
@@ -100,61 +112,76 @@ float falt;
 unsigned long age;
 unsigned char numSats;
 
-//int years;
-//byte months;
-//byte days;
-//byte hours;
-//byte minutes;
-//byte seconds;
-//byte hundredths;
+// tx time variables
+unsigned long onTxTime;
+unsigned long offTxTime;
+unsigned long txEvent;
+uint8_t txOn;
 
+//tx power variables
+uint8_t curPower;
+uint8_t newMaxPower;
 
 //GPS module dependent includes and config data
-//#include "TinyGPS.h"
-//TinyGPS gps;
 
 #ifdef org1411
-  //#include "SirfGPS.h"  
-  //SirfGPS gps;
   #include "TinyGPS.h"
   TinyGPS gps;
-  //const char sirfBaud[]={0xA0, 0xA2, 0x00, 0x09, 0x86, 0x00, 0x00, 0x25, 0x80, 0x08, 0x01, 0x00, 0x00, 0x01, 0x34, 0xB0, 0xB3};
-  //const char sirfNMEA[]={0xA0, 0xA2, 0x00, 0x02, 0x87, 0x02, 0x00, 0x89, 0xB0, 0xB3};
 #endif
 
 #ifdef a2235h
   #include "SirfGPS.h"  
   SirfGPS gps;
-  //#include "TinyGPS.h"
-  //TinyGPS gps;
+  // set to 9600 baud
   const char sirfBaud[]={0xA0, 0xA2, 0x00, 0x09, 0x86, 0x00, 0x00, 0x25, 0x80, 0x08, 0x01, 0x00, 0x00, 0x01, 0x34, 0xB0, 0xB3};
+  // set to NMEA??? check documentation
   //const char sirfNMEA[]={0xA0, 0xA2, 0x00, 0x02, 0x87, 0x02, 0x00, 0x89, 0xB0, 0xB3};
 #endif
 
+void powerCal(){  
+  curPower=EEPROM.read(0);  //read from eeprom to get power before restart
+  EEPROM.update(0,0xff);    //write to eeprom reset marker. meaning: set to max power and wait delay for user to get chance to set max power
+  beepOn=1;       //beep on
+  delay(3000);    //wait 3 sec  
+  beepOn=0;       //beep off
+  
+  if (curPower>maxPower) {
+    newMaxPower=maxPower;   //limit number to max power. override user reset value
+  }
+  else {
+    newMaxPower=curPower-1; // woops. we got restart. decrease max power
+  }
+
+  // for loop to ram power
+  for (curPower=0; curPower<=newMaxPower; curPower++){
+    uint8_t wr=curPower;
+    if (curPower>0) {   //if power > 0 then temorary var wr=power-1 for storage on next reboot
+      wr=curPower-1;
+    } else {
+      wr=0;             //if power already 0 then stay at 0
+    }
+    
+    EEPROM.update(0,wr);  //protected store lower power for next reboot
+    //  set TX power
+    radio.writeReg(REG_OCP,0x10111);
+    radio.writeReg(REG_TESTPA1,0x55);
+    radio.writeReg(REG_TESTPA2,0x70);
+    radio.writeReg(REG_PALEVEL,( 0b01100000 | curPower ) );
+    radio.transmitBegin();    
+    delay(100); //wait ramp timeout
+    EEPROM.update(0,curPower);  // if we are here than everything OK. store working power.
+  }
+  
+}
+
 void setup()
 { 
+  //Serial.begin(9600);
 
-// GPS module dependent initialisation
-#ifdef org1411
-  //Serial.flush();
-  //Serial.begin(115200);
-  //Serial.write(sirfBaud,sizeof(sirfBaud));
-  Serial.flush();
-  Serial.begin(4800);
-  //Serial.write(sirfBaud,sizeof(sirfBaud));  
-  //Serial.write(sirfNMEA,sizeof(sirfNMEA));
-#endif
-
-#ifdef a2235h 
-  Serial.flush();
-  Serial.begin(115200);
-  Serial.write(sirfBaud,sizeof(sirfBaud));
-  Serial.flush();
-  Serial.begin(9600);
-  Serial.write(sirfBaud,sizeof(sirfBaud));  
-  //Serial.write(sirfNMEA,sizeof(sirfNMEA));
-#endif
-
+  // f**k. init here Tx On and Off time
+  onTxTime=onTx*60*1000;
+  offTxTime=offTx*60*1000;
+  
   // Setup Timer2: CTC, prescaler 1024, irq on compare1 called baudRate times per second
   TCCR2A = _BV(WGM21);
   TCCR2B = _BV(CS22) | _BV(CS21) | _BV(CS20);
@@ -168,7 +195,7 @@ void setup()
   OCR1A = (F_CPU  / 64 / (beepFreq*2)) - 1;
   TIMSK1 = _BV(OCIE1A);
 
-  //beeper to output
+  //beeper pin to output
   sbi(beepDir,beepPin);
 
   //Radio init stuff
@@ -181,68 +208,99 @@ void setup()
 
   //init radio with libary functions
   radio.initialize();  
-  //radio.setFrequencyMHz(frequency);  
-#ifdef org1411
-  radio.writeReg(REG_FRFMSB,0x6C);
-  radio.writeReg(REG_FRFMID,0x7C);
-  radio.writeReg(REG_FRFLSB,0xCC);
-#endif  
-
-#ifdef a2235h 
-  radio.writeReg(REG_FRFMSB,0x6C);
-  radio.writeReg(REG_FRFMID,0x7A);
-  radio.writeReg(REG_FRFLSB,0xE1);
-#endif  
-
+ 
+  //Set radio frequency manual
+  #ifdef org1411
+    radio.writeReg(REG_FRFMSB,0x6C);
+    radio.writeReg(REG_FRFMID,0x7C);
+    radio.writeReg(REG_FRFLSB,0xCC);
+  #endif  
+  
+  #ifdef a2235h 
+    radio.writeReg(REG_FRFMSB,0x6C);
+    radio.writeReg(REG_FRFMID,0x7A);
+    radio.writeReg(REG_FRFLSB,0xE1);
+  #endif  
+  
   // +/- deviation freq = 61*register (6*61=366Hz, RTTY FSK shift=732 hz
   radio.writeReg(REG_FDEVMSB,0);
   radio.writeReg(REG_FDEVLSB,6);      
 
-  radio.writeReg(REG_PARAMP,0);
-  //radio.writeReg(REG_PARAMP,0b1111);
-  
-  radio.setPowerLevel(15);
-  
+  //radio.writeReg(REG_PARAMP,0);
+  radio.writeReg(REG_PARAMP,0b1111);
+    
   //rtty pin to output
   sbi(txPort,txPin);
-  radio.transmitBegin();
+  
+  //set TX power
+  powerCal();
+  
+  // GPS module dependent initialisation
+  #ifdef org1411
+    Serial.flush();
+    Serial.begin(4800);
+  #endif
+  
+  #ifdef a2235h 
+    Serial.flush();
+    Serial.begin(115200);
+    Serial.write(sirfBaud,sizeof(sirfBaud));
+    Serial.flush();
+    Serial.begin(9600);
+    Serial.write(sirfBaud,sizeof(sirfBaud));  
+    Serial.flush();
+    //Serial.write(sirfNMEA,sizeof(sirfNMEA));
+  #endif
+  
+  txEvent=millis()+onTxTime;    //init tx on/off event variable
+  txOn=1;                       //start with TX on
 }
 
 void loop()
 {
 
   // Read all characters from serial buffer and decode GPS data
-  //this part is module independent bause SiRFGPS and TinyGPS patched for identical interface
+  //this part is module independent because SiRFGPS and TinyGPS patched for identical interface
   while (Serial.available()) {        
     if (gps.encode(Serial.read())) {
       // Update position and altitude
       gps.f_get_position(&flat, &flon, &age);
       falt = gps.f_altitude();
       numSats = gps.satellites();
-      //gps.get_datetime(&date, &time, &age);
-      //gps.crack_datetime(&years, &months, &days, &hours, &minutes, &seconds, &hundredths, &age);
     }
   }  
 
+  // tx on/off logic
+  if ( millis() > txEvent ) {
+    if (txOn==1) {
+      txOn=0;
+      txEvent=millis()+offTxTime;
+    } else {
+      txOn=1;
+      txEvent=millis()+onTxTime;
+    }   
+  }
+
+  // if transmitter not transmitting then sreate new sata string
   if (!tx.isBusy()) {
-    // Create RTTY TX packet and transmit
-    char buffLatitude[10];
-    char buffLongitude[10];
-    char buffAltitude[8];
-
-    //snprintf(line, sizeof(line), "%s %s %s %hhu %hhu:%hhu:%hhu\n",
-    snprintf(line, sizeof(line), "%sN %sE %s %hhu %hhu\n",
-      dtostrf(flat, 0, 5, buffLatitude),
-      dtostrf(flon, 0, 5, buffLongitude),
-      dtostrf(falt, 0, 0, buffAltitude),
-      numSats,
-      //hours,
-      //minutes,
-      //seconds
-      age
-    );
-
-    tx.transmit(line, strlen(line));
+    if ( txOn==1 ){  
+      // Create RTTY TX packet and transmit
+      char buffLatitude[10];
+      char buffLongitude[10];
+      char buffAltitude[8];
+  
+      snprintf(line, sizeof(line), "%sN %sE %s %hhu %hhu\n",
+        dtostrf(flat, 0, 5, buffLatitude),
+        dtostrf(flon, 0, 5, buffLongitude),
+        dtostrf(falt, 0, 0, buffAltitude),
+        numSats,
+        age
+      );
+      radio.transmitBegin();
+      tx.transmit(line, strlen(line));
+    } else {
+      radio.transmitEnd();
+    }
   }
 
   //check GPS status for beeper and set correct beep times
@@ -264,7 +322,7 @@ void loop()
         nextEvent=g100ms+offTime;
       }    
   }
-  
+
 //  //for variable baudrate
 //  static uint16_t oldMs;
 //  if (oldMs!=g100ms){  
@@ -286,6 +344,7 @@ void loop()
 //timer1 interrupt for beeper stuff
 ISR (TIMER1_COMPA_vect){
   static uint8_t flip;    // local varaible to trace pin state (can be optimized)
+//  for passive beeper
 //  if (beepOn==1){  
 //    if (flip==0){
 //      flip=1;      
@@ -295,6 +354,8 @@ ISR (TIMER1_COMPA_vect){
 //      sbi(beepPort,beepPin); //digitalWrite(pinBeeper,HIGH);    
 //    }
 //  }
+
+//  for active beeper
   if (beepOn==1){  
       sbi(beepPort,beepPin); //digitalWrite(pinBeeper,HIGH);    
     } else {
