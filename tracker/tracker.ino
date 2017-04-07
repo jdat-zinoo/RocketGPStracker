@@ -5,24 +5,21 @@
 //#define a2235h
 #define org1411
 
-#define maxPower 31   //maximum tx power -18dBm + value
+#define maxPower 31   //maximum tx power=-18dBm + value
 
 const unsigned long onTx=5;     //transmiiter on time in minutes
 const unsigned long offTx=2;    //transmitter off time in minutes
 
-//const int kBaudRate = 300;      //RTTY baud rate
 const int kBaudRate = 50;       //RTTY baud rate
-const int beepFreq=2500;        //beeper tone frequncy. used only when passive beeper
+const int beepFreq=50;        //beeper tone frequncy. used only when passive beeper
 
 //Beeper time config
 //when GPS OK
 const uint8_t onTimeGood=10;    //1 sec on
 const uint8_t offTimeGood=50;   //5 sec off
-
 //when GPS bad
 const uint8_t onTimeBad=5;      //0.5sec on
 const uint8_t offTimeBad=5;     //0.5sec on
-
 
 /*
  * Atmega fuses: (E:FE, H:DA, L:FF)
@@ -61,20 +58,14 @@ const uint8_t offTimeBad=5;     //0.5sec on
 //  #define frequency 433.92f
 //#endif
 
-#ifdef a2235h
-  const  uint16_t maxAge=30000;    //maximum 5 seconds to wait for GPS serial data
-  const  uint8_t minSats=3;       //minimums Satelittes in GPS view for good fix
-#endif
-
-#ifdef org1411
-  const  uint16_t maxAge=5000;    //maximum 5 seconds to wait for GPS serial data
-  const  uint8_t minSats=3;       //minimums Satelittes in GPS view for good fix
-#endif
+const  uint16_t maxAge=5000;    //maximum 5 seconds to wait for GPS serial data
+const  uint8_t minSats=3;       //minimums Satelittes in GPS view for good fix
 
 #include "fsk.h"
 #include "RFM69OOK.h"
 #include "RFM69OOKregisters.h"
 #include <EEPROM.h>
+#include "TinyGPS.h"
 
 //const int txpin = A1;     //RTTY pin
 #define txDir DDRC
@@ -90,8 +81,9 @@ const uint8_t offTimeBad=5;     //0.5sec on
 #define radioResetPin 2
 
 
-FSKTransmitter tx;
+TinyGPS gps;
 
+FSKTransmitter tx;
 RFM69OOK radio(radioCsPin);
 
 //static uint8_t brDiv;   //for variable baudrate
@@ -123,19 +115,9 @@ uint8_t curPower;
 uint8_t newMaxPower;
 
 //GPS module dependent includes and config data
-
-#ifdef org1411
-  #include "TinyGPS.h"
-  TinyGPS gps;
-#endif
-
 #ifdef a2235h
-  #include "SirfGPS.h"  
-  SirfGPS gps;
-  // set to 9600 baud
-  const char sirfBaud[]={0xA0, 0xA2, 0x00, 0x09, 0x86, 0x00, 0x00, 0x25, 0x80, 0x08, 0x01, 0x00, 0x00, 0x01, 0x34, 0xB0, 0xB3};
-  // set to NMEA??? check documentation
-  //const char sirfNMEA[]={0xA0, 0xA2, 0x00, 0x02, 0x87, 0x02, 0x00, 0x89, 0xB0, 0xB3};
+  // set to NMEA 9600
+  const char sirfNMEA[]={0xA0, 0xA2, 0x00, 0x18, 0x81, 0x02, 0x01, 0x01, 0x00, 0x01, 0x01, 0x01, 0x05, 0x01, 0x01, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x25, 0x80, 0x01, 0x3A, 0xB0, 0xB3};
 #endif
 
 void powerCal(){  
@@ -244,12 +226,9 @@ void setup()
   #ifdef a2235h 
     Serial.flush();
     Serial.begin(115200);
-    Serial.write(sirfBaud,sizeof(sirfBaud));
+    Serial.write(sirfNMEA,sizeof(sirfNMEA));
     Serial.flush();
     Serial.begin(9600);
-    Serial.write(sirfBaud,sizeof(sirfBaud));  
-    Serial.flush();
-    //Serial.write(sirfNMEA,sizeof(sirfNMEA));
   #endif
   
   txEvent=millis()+onTxTime;    //init tx on/off event variable
@@ -289,7 +268,8 @@ void loop()
       char buffLongitude[10];
       char buffAltitude[8];
   
-      snprintf(line, sizeof(line), "%sN %sE %s %hhu %hhu\n",
+      //snprintf(line, sizeof(line), "%sN %sE %s %hhu %hhu\n",
+      snprintf(line, sizeof(line), "%s %s %s %hhu %hhu\n",
         dtostrf(flat, 0, 5, buffLatitude),
         dtostrf(flon, 0, 5, buffLongitude),
         dtostrf(falt, 0, 0, buffAltitude),
