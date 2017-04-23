@@ -7,10 +7,15 @@
 /*************************************************************************
  Hardware description
 
- ATTiny85, magnetometer (MAG3110), eject output pin, buzzer, LED.
+ AtTiny85, magnetometer (MAG3110), eject output pin, buzzer, LED.
  The buzzer output pin also senses battery voltage via a resistor divider.
  The eject output serves also as a safe/flight pin.
  ATTiny85 is connected via USI bus to an I2C slave device (MAG3110).
+ 
+ AtTiny85 fuses:
+ LFUSE 	= 0xE2
+ HFUSE 	= 0xDD
+ XFUSE 	= 0xFF
 *************************************************************************/
 
 #include "Arduino.h"
