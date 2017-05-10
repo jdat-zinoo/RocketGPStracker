@@ -1,9 +1,3 @@
-//#include <inttypes.h>
-//#include <avr/io.h>
-//#include <avr/eeprom.h>
-//#include <avr/interrupt.h>
-//#include <util/delay.h>
-
 /*************************************************************************
  Hardware description
 
@@ -18,7 +12,8 @@
  XFUSE 	= 0xFF
 *************************************************************************/
 
-#include "Arduino.h"
+//#define DEBUG   1
+
 #include <EEPROM.h>
 #include <TinyWireM.h>
 
@@ -27,14 +22,14 @@
 #include "I2C.h"
 #include "MAG3110.h"
 #include "MS5607.h"
+#include "flash.h"
 #include "tiny.hh"
-
-// 0 for normal operation, 1 for debug (serial output)
-#define DEBUG   1
 
 const int kDitLength = 150 / 25;  // 10 wps
 
 const int kLOG_SIZE = 160;      // 3 bytes per entry
+
+const uint16_t flashSize=1000;  //entries in I2C EEPROM
 
 const int kSERVO_PERIOD_MS  = 20;
 const int kSERVO_ON_mS      = 1000;
@@ -47,12 +42,7 @@ DigitalOut<PortB::pin4> led;
 DigitalOut<PortB::pin3> pyro;
 DigitalOut<PortB::pin1> buzzer;
 
-#if DEBUG
-  TextOutStream<SoftwareSerialOut<DigitalOut<PortB::pin4>, 9600> > dbg;
-  //TextOutStream<NullOutput> dbg;
-#else
-  TextOutStream<NullOutput> dbg;
-#endif
+TextOutStream<SoftwareSerialOut<DigitalOut<PortB::pin4>, 9600> > dbg;
 
 const char *endl = "\r\n";
 
@@ -60,42 +50,47 @@ I2C bus;
 BarometerSimple baroSensor(bus);
 MAG3110 magSensor;
 
-void testI2C();
-void testLED();
-void flashID(uint8_t id);
+/*
+//void testI2C();
+//void testLED();
+//void flashID(uint8_t id);
 
-void initPyro();
-void initSensors();
-void resetCalibration();
+//void initPyro();
+//void initSensors();
+//void resetCalibration();
 
-void calibrate(int16_t mx, int16_t my, int16_t mz);
-void calibrateBaro(uint16_t p);
+//void calibrate(int16_t mx, int16_t my, int16_t mz);
+//void calibrateBaro(uint16_t p);
 
-bool checkFlightPin();
-void errorHalt();
-void clearLog();
-bool reportLog(uint16_t index);
-void updateLog(uint16_t index);
+//bool checkFlightPin();
+//void errorHalt();
+//void clearLog();
+//bool reportLog(uint16_t index);
+//void updateLog(uint16_t index);
 
-void setMaxAltitude(uint16_t altitude);
+//void setMaxAltitude(uint16_t altitude);
 
-uint8_t lookupMorse(char c);
+//uint8_t lookupMorse(char c);
 
-void restoreState();
-void saveState();
-
+//void restoreState();
+//void saveState();
+*/
 struct LogEntry {
   uint8_t   mag;
   uint16_t  altitude;
 };
 
+struct i2cLogEntry {
+  uint8_t   stateLog;
+  uint16_t  pressure;
+  uint16_t  magX;
+  uint16_t  magY;
+  uint16_t  magZ;
+  uint8_t   magT;
+};
 
-/*
-   Magnetic field zero values: 3378 / -4132 / 4365
- */
 
 enum {
-  kSTATE_RESET,
   kSTATE_SAFE,
   kSTATE_FLIGHT
 };
@@ -128,6 +123,8 @@ uint8_t  gMessage[6];
 
 volatile uint8_t gFlags;
 
+uint16_t gFlashIndex;
+
 void setup()
 {
   TinyWireM.begin();
@@ -151,7 +148,7 @@ void setup()
 
   //testI2C();
 
-  initPyro();
+  //initPyro();
   initSensors();
 
   restoreState();
@@ -235,7 +232,7 @@ void loop()
 */
 //dbg << mx << "," << my << "," << mz << "," << gZeroY << endl;
 
-    bool doEject = magOK && (my < gZeroY);
+    bool doEject = magOK && (my > gZeroY);
 
     if (gState == kSTATE_SAFE) {
       // SAFE state
@@ -542,7 +539,7 @@ void initSensors() {
     errorHalt();
   }
 }
-
+/*
 void initPyro() {
   for (uint8_t cnt = 0; cnt < 25; cnt++) {
     //pyro.high();
@@ -551,7 +548,7 @@ void initPyro() {
     //delay(kSERVO_PERIOD_MS);
   }
 }
-
+*/
 void testLED()
 {
   led.high();

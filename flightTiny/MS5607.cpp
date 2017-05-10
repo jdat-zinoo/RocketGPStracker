@@ -1,5 +1,5 @@
 #include "MS5607.h"
-
+#include "TinyWireM.h"
 
 MS5607::MS5607(I2C &bus, byte subAddress) : _bus(bus) {
   _address = (0x76 | (subAddress & 1));

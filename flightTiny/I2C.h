@@ -1,4 +1,7 @@
 #pragma once
+//#include <stdint.h>
+
+//#define byte uint8_t
 #include <Arduino.h>
 
 class I2C {

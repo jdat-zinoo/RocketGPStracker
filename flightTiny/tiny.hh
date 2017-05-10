@@ -1,8 +1,9 @@
+#pragma once
 #include <avr/io.h>
 #include <util/delay.h>
 
 #include <stdint.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 
 #define bit_set(x, bit)   ((x) |= (1 << (bit)))
 #define bit_clear(x, bit)   ((x) &= ~(1 << (bit)))
