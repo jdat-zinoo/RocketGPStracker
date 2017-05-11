@@ -2,7 +2,6 @@
  Hardware description
 
  AtTiny85, magnetometer (MAG3110), eject output pin, buzzer, LED.
- The buzzer output pin also senses battery voltage via a resistor divider.
  The eject output serves also as a safe/flight pin.
  ATTiny85 is connected via USI bus to an I2C slave device (MAG3110).
  
@@ -15,15 +14,15 @@
 //#define DEBUG   1
 
 #include <EEPROM.h>
-#include <TinyWireM.h>
+#include "TinyWireM.h"
 
 #include <avr/sleep.h>
 
+#include "tiny.h"
 #include "I2C.h"
 #include "MAG3110.h"
 #include "MS5607.h"
 #include "flash.h"
-#include "tiny.hh"
 
 const int kDitLength = 150 / 25;  // 10 wps
 
@@ -46,35 +45,11 @@ TextOutStream<SoftwareSerialOut<DigitalOut<PortB::pin4>, 9600> > dbg;
 
 const char *endl = "\r\n";
 
+flash ee;
 I2C bus;
 BarometerSimple baroSensor(bus);
 MAG3110 magSensor;
 
-/*
-//void testI2C();
-//void testLED();
-//void flashID(uint8_t id);
-
-//void initPyro();
-//void initSensors();
-//void resetCalibration();
-
-//void calibrate(int16_t mx, int16_t my, int16_t mz);
-//void calibrateBaro(uint16_t p);
-
-//bool checkFlightPin();
-//void errorHalt();
-//void clearLog();
-//bool reportLog(uint16_t index);
-//void updateLog(uint16_t index);
-
-//void setMaxAltitude(uint16_t altitude);
-
-//uint8_t lookupMorse(char c);
-
-//void restoreState();
-//void saveState();
-*/
 struct LogEntry {
   uint8_t   mag;
   uint16_t  altitude;
@@ -146,11 +121,12 @@ void setup()
   _delay_ms(100);
   gBuzzerMode = kBUZZER_SILENT;
 
-  //testI2C();
 
   //initPyro();
   initSensors();
 
+  testI2C();
+  
   restoreState();
 
   if (checkFlightPin()) {
@@ -221,16 +197,8 @@ void loop()
       }
       gAltitude = baroSensor.getAltitude(pressureComp);
     }
-/*
-    dbg << pressureComp << " / " << gAltitude
-        << " (max " << gMaxAltitude << "/" << (const char *)gMessage << ")"
-        << " * " << mx << " / " << my << " / " << mz << " | " << gZeroY << endl;
-*/
-/*
-    dbg << "Press: " <<pressureComp << " Alt: " << gAltitude
-      << " * MagY: " << my << " | MagZero: " << gZeroY << " / State: " << gState << endl;
-*/
-//dbg << mx << "," << my << "," << mz << "," << gZeroY << endl;
+
+dbg << mx << "," << my << "," << mz << "," << gZeroY << endl;
 
     bool doEject = magOK && (my > gZeroY);
 
@@ -348,8 +316,8 @@ ISR(TIMER1_COMPA_vect) {
     bit_set(gFlags, kFLAG_SERVO);
   }
 
-  //uint8_t measurePeriod = (gState == kSTATE_SAFE) ? 25 : 125;
-  uint8_t measurePeriod = (gState == kSTATE_SAFE) ? 25 : 75;
+  uint8_t measurePeriod = (gState == kSTATE_SAFE) ? 25 : 125;
+  //uint8_t measurePeriod = (gState == kSTATE_SAFE) ? 25 : 75;
   if (++cnt2 >= measurePeriod) {
     cnt2 = 0;
     bit_set(gFlags, kFLAG_MEASURE);
@@ -417,37 +385,10 @@ ISR(TIMER1_COMPA_vect) {
 
 void calibrate(int16_t mx, int16_t my, int16_t mz)
 {
-
-  //static int16_t minx = 32000, miny = 32000, minz = 32000;
-  //static int16_t maxx = -32000, maxy = -32000, maxz = -32000;
-
-  //if (mx > maxx) maxx = mx;
-  //else if (mx < minx) minx = mx;
-  //if (my > maxy) maxy = my;
-  //else if (my < miny) miny = my;
-  //if (mz > maxz) maxz = mz;
-  //else if (mz < minz) minz = mz;
-
-  //int16_t cx = (minx + maxx) / 2;
-  //int16_t cy = (miny + maxy) / 2;
-  //int16_t cz = (minz + maxz) / 2;
-
-
-  //dbg << "Cal: [" << cx << "/" << cy << "/" << cz << "]" << endl;
-  //dbg << mx << "," << my << "," << mz << "," << cx << "," << cy << "," << cz << endl;
-  //dbg <<  my << ","  << cy  << endl;
-
   if (my < gMinY) gMinY = my;
   if (my > gMaxY) gMaxY = my;
   gZeroY = (gMinY + gMaxY) / 2;
 
-  //int16_t a = (gMinY + gMaxY) / 2;
-  //gZeroY=a+(gMaxY-a)/2;
-
-  //gZeroY=gZeroY+gZeroY/2;
-  //gZeroY = (gMinY + gMaxY) / 4;
-
-  //dbg <<  my << ","  << gZeroY  << endl;
 }
 
 void calibrateBaro(uint16_t pressure)
@@ -485,17 +426,11 @@ bool checkFlightPin() {
 
   result = (adcValue > 50);
 
-  //pyro.readAnalog();
   pyro.modeOutput();
   ADCSRA = 0;
 
   return result;
 
-  /*
-  led.high();
-  _delay_us(100);
-  return (led.read() != 0);
-  */
 }
 
 void errorHalt() {
@@ -539,24 +474,11 @@ void initSensors() {
     errorHalt();
   }
 }
-/*
-void initPyro() {
-  for (uint8_t cnt = 0; cnt < 25; cnt++) {
-    //pyro.high();
-    //delay(kSERVO_OFF_US);
-    //pyro.low();
-    //delay(kSERVO_PERIOD_MS);
-  }
-}
-*/
+
 void testLED()
 {
   led.high();
   _delay_ms(500);
-  //pyro.high();
-  //_delay_ms(100);
-  //pyro.low();
-
   led.low();
   _delay_ms(1000);
 }
@@ -565,14 +487,12 @@ void flashID(uint8_t id)
 {
   for (uint8_t mask = 0x80; mask > 0; mask >>= 1) {
     if (id & mask) {
-      //pyro.high();
     }
     else {
       led.high();
     }
     _delay_ms(400);
     led.low();
-    //pyro.low();
     _delay_ms(100);
   }
 }
@@ -580,51 +500,20 @@ void flashID(uint8_t id)
 
 void testI2C() {
   //SoftwareI2C<PortB::pin0, PortB::pin2> bus;
-/*
-test.modeOutput();
-while (true){
-  test.high();
-  delay(2000);
-  test.low();
-  delay(2000);
+  uint8_t a;
+  byte rc;
+  rc=ee.begin();
+  //rc=ee.writeByte(5,0x55);
+  //dbg << "FLASH wr: " << rc << endl;
+  //rc=ee.readByte(5,a);  
+  //dbg << "FLASH rd: " << rc << "\t" << a << endl;
+
+  for (uint16_t i=1;i!=0;i++){
+    //rc=ee.writeByte(i,lowByte(i));
+    rc=ee.readByte(i,a);  
+    dbg << "FLASH rd: " << i << "\t" << a << "\t" << rc <<endl;
   }
   errorHalt();
-*/
-/*
-  uint8_t slaveAddress = 0b0011110;
-  uint8_t rc;
-  for (uint8_t i=0;i<127;i++){
-    slaveAddress=i;
-    TinyWireM.beginTransmission(slaveAddress);
-    TinyWireM.send(0x0);
-    rc = TinyWireM.endTransmission();
-    if (rc != 0) {
-      dbg << "Failed to write to slave" << endl;
-    }
-    else {
-      rc = TinyWireM.requestFrom(slaveAddress, 1); // Request 1 byte from slave
-      if (rc != 0) {
-        dbg << "Failed to read from slave: " << i << endl;
-      }
-    }
-    if (TinyWireM.available() > 0) {
-      uint8_t id = TinyWireM.receive();
-      dbg << "ID: " << id << endl;
-    }
-  }
-errorHalt();
-*/
-/*
-//char s[5];
-byte a;
-  for (byte i=8;i<127;i++){
-    //bus.read(i<<1, s, 0);
-    TinyWireM.beginTransmission(i);
-    a=TinyWireM.endTransmission();
-    dbg << "I: " << i << " data: " <<  a <<endl;
-  }
-  errorHalt();
-*/
 }
 
 void clearLog()

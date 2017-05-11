@@ -1,44 +1,39 @@
 #include "flash.h"
 #include "TinyWireM.h"
 
-//#include <Arduino.h>
-#include "tiny.hh"
+#include "tiny.h"
 
-bool flash::begin(void) {
+uint8_t flash::begin(void) {
   slaveAddress = 0x50;    //7-bit address 
-  //slaveAddress = 0xA0;    //8-bit address
-  
-  // Try to read device ID
-  uint8_t id;
-  //if (!readByte(regWHO_AM_I, &id)) {
-    //dbg << "Begin: " id << endl;
-    //return false;
-  //}
-  return id; // == 0xC4;
+  return slaveAddress; // == 0xC4;
 }
 
-bool flash::readByte(uint16_t addr, uint8_t *value) {
+bool dummyRead(uint8_t r,uint8_t *v){
+  *v=r;
+}
+
+bool flash::readByte(uint16_t addr, uint8_t &val) {
   uint8_t rc;
   TinyWireM.beginTransmission(slaveAddress);
-  TinyWireM.send(highByte(addr));
-  TinyWireM.send(lowByte(addr));
-  rc = TinyWireM.endTransmission();
+  TinyWireM.write(highByte(addr));
+  TinyWireM.write(lowByte(addr));
+  rc = TinyWireM.endTransmission(false);
   if (rc != 0) return false;
-
   rc = TinyWireM.requestFrom(slaveAddress, 1); // Request 1 byte from slave
   if (rc != 0) return false;
-
-  if (TinyWireM.available() == 0) return false;
-  *value = TinyWireM.receive();
+  if (TinyWireM.available() != 1) return false;
+  rc = TinyWireM.read();
+  dummyRead(rc,(uint8_t *)&val);
+  //val=rc;
   return true;
 }
 
-bool flash::writeByte(uint16_t addr, uint8_t value) {
+bool flash::writeByte(uint16_t addr, uint8_t val) {
   uint8_t rc;
   TinyWireM.beginTransmission(slaveAddress);
-  TinyWireM.send(highByte(addr));
-  TinyWireM.send(lowByte(addr));
-  TinyWireM.send(value);
+  TinyWireM.write(highByte(addr));
+  TinyWireM.write(lowByte(addr));
+  TinyWireM.write(val);
   rc = TinyWireM.endTransmission();
   if (rc != 0) return false;
   return true;

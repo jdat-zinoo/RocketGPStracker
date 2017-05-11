@@ -1,6 +1,6 @@
 #include "I2C.h"
 
-#include <TinyWireM.h>
+#include "TinyWireM.h"
 
 I2C::I2C() {
   rxTimeout = 200;

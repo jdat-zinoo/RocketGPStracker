@@ -2,7 +2,7 @@
 #include "TinyWireM.h"
 
 //#include <Arduino.h>
-#include "tiny.hh"
+#include "tiny.h"
 
 #define regDR_STATUS 0x00
 
