@@ -22,8 +22,8 @@ bool flash::readByte(uint16_t addr, uint8_t &val) {
   rc = TinyWireM.requestFrom(slaveAddress, 1); // Request 1 byte from slave
   if (rc != 0) return false;
   if (TinyWireM.available() != 1) return false;
-  rc = TinyWireM.read();
-  dummyRead(rc,(uint8_t *)&val);
+  val = TinyWireM.read();
+  //dummyRead(rc,(uint8_t *)&val);
   //val=rc;
   return true;
 }
@@ -35,6 +35,7 @@ bool flash::writeByte(uint16_t addr, uint8_t val) {
   TinyWireM.write(lowByte(addr));
   TinyWireM.write(val);
   rc = TinyWireM.endTransmission();
+  _delay_ms(5);
   if (rc != 0) return false;
   return true;
 }

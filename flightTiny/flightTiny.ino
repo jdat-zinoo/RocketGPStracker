@@ -55,16 +55,6 @@ struct LogEntry {
   uint16_t  altitude;
 };
 
-struct i2cLogEntry {
-  uint8_t   stateLog;
-  uint16_t  pressure;
-  uint16_t  magX;
-  uint16_t  magY;
-  uint16_t  magZ;
-  uint8_t   magT;
-};
-
-
 enum {
   kSTATE_SAFE,
   kSTATE_FLIGHT
@@ -502,14 +492,15 @@ void testI2C() {
   //SoftwareI2C<PortB::pin0, PortB::pin2> bus;
   uint8_t a;
   byte rc;
+  uint8_t j=7;
   rc=ee.begin();
   //rc=ee.writeByte(5,0x55);
   //dbg << "FLASH wr: " << rc << endl;
   //rc=ee.readByte(5,a);  
   //dbg << "FLASH rd: " << rc << "\t" << a << endl;
 
-  for (uint16_t i=1;i!=0;i++){
-    //rc=ee.writeByte(i,lowByte(i));
+  for (uint8_t i=1;i!=0;i++){
+    rc=ee.writeByte(i,(127-i));
     rc=ee.readByte(i,a);  
     dbg << "FLASH rd: " << i << "\t" << a << "\t" << rc <<endl;
   }
