@@ -7,8 +7,12 @@
  
  AtTiny85 fuses:
  LFUSE 	= 0xE2
- HFUSE 	= 0xDD
+ HFUSE 	= 0xD6
  XFUSE 	= 0xFF
+
+ * Internal RC @ 8MHz
+ * Brownout<1.8v
+ * Preserve EEPROM memory
 *************************************************************************/
 
 //#define DEBUG   1
@@ -24,23 +28,14 @@
 #include "MS5607.h"
 #include "flash.h"
 
-const int kDitLength = 150 / 25;  // 10 wps
-
 const int kLOG_SIZE = 160;      // 3 bytes per entry
 
 const uint16_t flashSize=5460;  //entries in I2C EEPROM
 //const uint16_t flashSize=50;  //entries in I2C EEPROM
 
-const int kSERVO_PERIOD_MS  = 20;
-const int kSERVO_ON_mS      = 1000;
-
-const uint8_t kTIMER1_DIV512  = 0b1010;
-const uint8_t kTIMER1_DIV1024 = 0b1011;
-const uint8_t kTIMER1_PERIOD = F_CPU / 1024 * kSERVO_PERIOD_MS / 1000;
-
-DigitalOut<PortB::pin4> led;
+const uint8_t kTIMER1_DIV4096 = 0b1101;
 DigitalOut<PortB::pin3> pyro;
-DigitalOut<PortB::pin1> buzzer;
+DigitalOut<PortB::pin1> led;
 
 TextOutStream<SoftwareSerialOut<DigitalOut<PortB::pin4>, 9600> > dbg;
 
@@ -51,16 +46,22 @@ BarometerSimple baroSensor(bus);
 MAG3110 magSensor;
 flash ee;
 
-struct LogEntry {
-  uint8_t   mag;
-  uint16_t  altitude;
+// structure for restart protected data
+struct _stateData {
+  uint16_t zeroPressure;        // pressure on launchpad
+  int16_t zeroY;                // magnetometer midpoint while calibrating
+  uint16_t flashIndex;          // last entry in I2C EEPROM flash
+  uint16_t maxAltitude;         // max Altitude
+  volatile uint8_t isDescent;   // for some unknown state ??? must be resolved
 };
 
+// arm pin state
 enum {
   kSTATE_SAFE,
   kSTATE_FLIGHT
 };
 
+// buzzer state
 enum {
   kBUZZER_TEST,
   kBUZZER_SILENT,
@@ -68,29 +69,27 @@ enum {
   kBUZZER_ASCENT
 };
 
+// in SAFE mode calibrating. in FLIGHT mode measuring ??? Why? must be resolved
 enum {
   kFLAG_MEASURE,
-  kFLAG_CAL,
-  kFLAG_SERVO
+  kFLAG_CAL
 };
 
-int16_t gMinY, gMaxY, gZeroY;
-uint16_t gZeroPressure;
+// minimum and maximum for magnetometer Y axis
+int16_t gMinY, gMaxY;
 
-volatile uint8_t gState;
-volatile uint8_t gIsDescent;
-volatile bool    gPyroOn;
-volatile uint8_t gBuzzerMode;
-uint16_t gAltitude;
-uint16_t gMaxAltitude;
-uint8_t  gLogIndex;
+volatile uint8_t shoot=0;   // pyro shooting state. ??? dirty! must be resolved
 
-uint8_t  gMessage[6];
+volatile uint8_t gState;    // system state. ??? must be resolved
+volatile uint8_t    gPyroOn=0;    // if this !=0 then pyro will shoot. Be careful
+volatile uint8_t gBuzzerMode;     // buzzer state variable
+uint16_t gAltitude;               // current altitude
 
-volatile uint8_t gFlags;
+volatile uint8_t gFlags;          // some system flags ??? must be resolved
 
-uint16_t gFlashIndex;
+_stateData stateData;             // restart protected data
 
+// this will erase all eeprom contents. must be optimised
 void clearFlash(){
     ee.entry.magX=0;
     ee.entry.magY=0;
@@ -105,85 +104,50 @@ void clearFlash(){
     }
   
 }
+
 void setup()
 {
-  TinyWireM.begin();
-  dbg.begin();
+  gPyroOn=0;          // just in case no shoot at this point
+  
+  TinyWireM.begin();  // init I2C
+  dbg.begin();        // init serial output
 
-  dbg << "Reset" << endl;
+  dbg << "Reset" << endl;   // we are booting
 
   //clearFlash();
-  // Setup measurement timer
-  //TCCR1 = _BV(CTC1) | kTIMER1_DIV512;
-  TCCR1 = kTIMER1_DIV512;
-  OCR1C = 124;
-  OCR1A = 124;
+  
+  // Setup measurement timer. 10 IRQs per second
+  TCCR1 = _BV(CTC1) | kTIMER1_DIV4096;
+  //TCCR1 = kTIMER1_DIV512;
+  OCR1C = 193;
+  OCR1A = OCR1C;
   TIMSK |= _BV(OCIE1A);
 
   sei();
 
-  // Beep buzzer to indicate reset
-  gBuzzerMode = kBUZZER_TEST;
-  _delay_ms(100);
-  gBuzzerMode = kBUZZER_SILENT;
-
-
-  //initPyro();
   initSensors();
+  EEPROM.get(0, stateData);  //restoreState
 
-  //testI2C();
+  reportState();      // dump state data (internal eeprom) to serial
   
-  restoreState();
-
-  dbg << "idx,state,press,alt,X,Y,Z,T" << endl;
-  if (checkFlightPin()) {
+  dbg << "idx,state,press,alt,X,Y,Z,T" << endl;   // header for I2C EEPROM data. dirty hack
+  if (checkFlightPin()==1) {
     gState = kSTATE_FLIGHT;
   }
   else {
     gState = kSTATE_SAFE;
-    resetCalibration();
-    setMaxAltitude(0);
+    resetCalibration();       // something messy. neet to check
+    //setMaxAltitude(0);
+    //stateData.maxAltitude = 0;
   }
-
-  _delay_ms(100);
-  gBuzzerMode = kBUZZER_TEST;
-  _delay_ms(100);
-  gBuzzerMode = kBUZZER_SILENT;
-  _delay_ms(500);
 }
-
-class StringBuf {
-public:
-  StringBuf() : _buffer(0), _length(0), _capacity(0) {}
-  StringBuf(char *buffer, uint8_t capacity) { assign(buffer, capacity); }
-
-  void assign(char *buffer, uint8_t capacity) {
-    _buffer = buffer;
-    _length = 0;
-    _capacity = capacity;
-  }
-
-  void write(uint8_t b) {
-    if (_length < _capacity) {
-      _buffer[_length] = b;
-      _length++;
-    }
-  }
-
-private:
-  char *_buffer;
-  uint8_t _length;
-  uint8_t _capacity;
-};
 
 void loop()
 {
-  static uint8_t  pyroTimer;
-  static bool     pyroPhase;
+  static uint16_t rFlashIndex;      //I2C EEPROM flash index for reading and data dumping only.
 
-  static uint16_t rFlashIndex;
-  if (bit_check(gFlags, kFLAG_MEASURE)) {
-    bit_clear(gFlags, kFLAG_MEASURE);
+  if (bit_check(gFlags, kFLAG_MEASURE)) {       //we got main instructions form timer to exeute main loop
+    bit_clear(gFlags, kFLAG_MEASURE);           // reset flag, amd wait for next chance from timer
 
     // Get sensor measurements
     int16_t   mx, my, mz;
@@ -191,6 +155,7 @@ void loop()
     bool magOK = magSensor.readMag(mx, my, mz);
     bool baroOK = baroSensor.update();
 
+    // store data in I2C EEPROm structure for logging
     ee.entry.magX=mx;
     ee.entry.magY=my;
     ee.entry.magZ=mz;
@@ -202,33 +167,35 @@ void loop()
 
       //dbg << pressure <<endl;
 
-      if (gZeroPressure != 0) {
-        pressureComp = (uint32_t)pressure * 25325 / gZeroPressure;
+      if (stateData.zeroPressure != 0) {
+        pressureComp = (uint32_t)pressure * 25325 / stateData.zeroPressure;
       }
       else {
         pressureComp = pressure;
       }
       gAltitude = baroSensor.getAltitude(pressureComp);
     }
-    
+
+    // store data in I2C EEPROm structure for logging
     ee.entry.pressure=pressureComp;
     ee.entry.altitude=gAltitude;
 
-
 //dbg << mx << "," << my << "," << mz << "," << gZeroY << endl;
 
-    bool doEject = magOK && (my > gZeroY);
+    // this is tricky, must be fixed
+    bool doEject = magOK && (my > stateData.zeroY);     //depending on electronic orientation use ">" or "<"
 
+    // hack to store some system state in I2C EEPROM
     uint8_t xxx=0;
     xxx=(gState & 0x1)<<7;
     xxx=xxx | ((doEject & 0x1)<<6);
     xxx=xxx | ((gBuzzerMode & 0x3) <<4);
-    xxx=xxx | ((gIsDescent & 0x1 ) <<3);
+    xxx=xxx | ((stateData.isDescent & 0x1 ) <<3);
     ee.entry.stateLog=xxx;
 
     if (gState == kSTATE_SAFE) {
       // SAFE state
-      // * indicate eject event on the buzzer
+      // * indicate eject event on the led
       // * calibrate magnetic sensor range
       // * calibrate reference (ground) pressure value
       // * dump log data on serial port (LED)
@@ -238,30 +205,22 @@ void loop()
       if (magOK) calibrate(mx, my, mz);
       if (baroOK) calibrateBaro(pressure);
 
-      if (gLogIndex >= kLOG_SIZE) {
-        gLogIndex = 0;  // Start all over again
-      }
-      if (reportLog(gLogIndex)) {
-        gLogIndex++;
-      }
-      else {
-        gLogIndex = 0;
-      }
-
-      if (rFlashIndex<flashSize){
+           
+      if (rFlashIndex<stateData.flashIndex){
         reportFlashLog(rFlashIndex++);
       } else {
         rFlashIndex=0;
+        reportState();
       }
       // Check if state has changed
-      if (checkFlightPin()) {
+      if (checkFlightPin()==1) {
         gState = kSTATE_FLIGHT;
-        setMaxAltitude(0);
-        gIsDescent = false;
-        saveState();
-        clearLog();
-        clearFlashLog();
-        gLogIndex = 0;
+        stateData.maxAltitude=0;
+        stateData.isDescent = false;
+        //saveState();
+        clearFlashLog(); //Also saves all state
+        //gLogIndex = 0;
+        
       }
     }
     else if (gState == kSTATE_FLIGHT) {
@@ -270,153 +229,124 @@ void loop()
       // * compute altitude
       // * update and store log data
 
-      dbg << gFlashIndex <<  endl;
-      if (gAltitude > gMaxAltitude) {
-        setMaxAltitude(gAltitude);
+      dbg << stateData.flashIndex <<  endl;
+      if (gAltitude > stateData.maxAltitude) {
+        stateData.maxAltitude=gAltitude;
       }
 
       if (doEject) {
-        //if (!gPyroOn)
-        {
-          gIsDescent = true;
-
-          pyroPhase = !pyroPhase;   // alternate between on/off states
-          gPyroOn = pyroPhase;
-          pyroTimer = 125;
-        }
+        gPyroOn=1;
+        stateData.isDescent = true;        
       }
       else {
-        pyroPhase = false;
-        if (gPyroOn) {
-          gPyroOn = false;
-          pyroTimer = 125;
-        }
+        gPyroOn=0;
       }
 
-      gBuzzerMode = gIsDescent ? kBUZZER_DESCENT : kBUZZER_ASCENT;
+      gBuzzerMode = stateData.isDescent ? kBUZZER_DESCENT : kBUZZER_ASCENT;
 
-      if (gLogIndex < kLOG_SIZE) {
-        updateLog(gLogIndex++);
-      }
+      //if (gLogIndex < kLOG_SIZE) {updateLog(gLogIndex++);}
 
-      if (gFlashIndex<flashSize){
-        updateFlashLog(gFlashIndex++);
-        EEPROM.put(4, gFlashIndex);
+      if (stateData.flashIndex<flashSize){
+        updateFlashLog(stateData.flashIndex++);
+        
       }
+      //saveState(); //automatically saves flash memory index
+      EEPROM.put(0, stateData);  //save State //automatically saves flash memory index
+      
       // Check if state has changed
-      if (!checkFlightPin()) {
+      if (checkFlightPin()==0) {
         gState = kSTATE_SAFE;
         resetCalibration();
-        gPyroOn = false;
-        pyroTimer = 125;
+        gPyroOn = 0;
         rFlashIndex=0;
+        reportState();
+        dbg << "idx,state,press,alt,X,Y,Z,T" << endl;
       }
     }
   }
 
-
-  if (bit_check(gFlags, kFLAG_SERVO)) {
-    bit_clear(gFlags, kFLAG_SERVO);
-
-    if (pyroTimer) {
-      pyroTimer--;
-
-      pyro.high();
-      if (gPyroOn) _delay_ms(kSERVO_ON_mS);
-      //else _delay_us(kSERVO_OFF_US);
-      pyro.low();
-    }
-    else {
-      pyro.low();
-    }
-  }
-
-  //delay(1000);
   sleep_mode();
 }
 
+volatile uint8_t cnt2;
+
 ISR(TIMER1_COMPA_vect) {
-  TCNT1 = 0;
+  //TCNT1 = 0;
   static uint8_t cnt1;
-  static uint8_t cnt2;
-
-  static uint8_t msgIdx;
-  static uint8_t ditIdx;
-  static uint8_t ditTimer;
-  static uint8_t morseCode;
-  static uint8_t ditCount;
-  static uint8_t ditState;
-
+  
   if (++cnt1 >= 30) {
     cnt1 = 0;
-    bit_set(gFlags, kFLAG_SERVO);
   }
-
-  //uint8_t measurePeriod = (gState == kSTATE_SAFE) ? 25 : 125;
-  //uint8_t measurePeriod = (gState == kSTATE_SAFE) ? 25 : 60;
-  uint8_t measurePeriod=25;
-  if (++cnt2 >= measurePeriod) {
+  
+  if (++cnt2 >= 10) {
     cnt2 = 0;
-    bit_set(gFlags, kFLAG_MEASURE);
   }
+    bit_set(gFlags, kFLAG_MEASURE);
 
+  if ( (gPyroOn!=0) && (cnt2 < 5) ) {
+    pyro.high();
+    shoot=1;
+  } else {
+    pyro.low();
+    shoot=0;
+  }
+  
   switch (gBuzzerMode) {
   case kBUZZER_SILENT:
-    buzzer.low();
+    led.low();
     break;
   case kBUZZER_TEST:
-    buzzer.high();
+    led.high();
     break;
   case kBUZZER_ASCENT:
-    if (cnt2 < 10 || (cnt2 > 20 && cnt2 < 40)) buzzer.high();
-    else buzzer.low();
-
+    if (cnt1 < 2 || (cnt1 > 8 && cnt1 < 15)) led.high();
+    else led.low();
     break;
-  case kBUZZER_DESCENT:
-    if (ditTimer) ditTimer--;
-    else {
-      if (ditState == 1) {
-        // Intercharacter silence
-        ditState = 0;
-        ditTimer = (ditIdx == 0) ? 3*kDitLength : kDitLength;
-        if (ditIdx == 0 && gMessage[msgIdx] == 0) {
-          msgIdx = 0;
-          ditTimer = 12*kDitLength;
-        }
-      }
-      else {
-        if (ditIdx > 0) {
-          ditIdx--;
-          morseCode >>= 1;
-          ditTimer = (morseCode & 1) ? 3*kDitLength : kDitLength;
-          ditState = 1;
-        }
-        else {
-          // look up morse code
-          morseCode = lookupMorse(gMessage[msgIdx]);
-          ditCount = morseCode >> 5;
-          //morseCode = 0b00000010;
-          //ditCount = 5;
-
-          if (ditCount > 0) {
-            ditIdx = ditCount - 1;
-            ditState = 1;
-            ditTimer = (morseCode & 1) ? 3*kDitLength : kDitLength;
-          }
-
-          msgIdx++;
-        }
-      }
-    }
-
-    // Dit/deet
-    if (ditState == 1) {
-      buzzer.high();
-    }
-    else {
-      buzzer.low();
-    }
+  case kBUZZER_DESCENT:    
+    if (cnt1 < 2 || (cnt1 > 8 && cnt1 < 15)) led.high();
+    else led.low();
     break;
+
+  }
+}
+
+int checkFlightPin() {
+  int result=-1;
+  if (shoot==0){
+      ADCSRA = _BV(ADPS2) | _BV(ADEN);
+    
+      
+      pyro.low();
+      pyro.modeInput();
+      _delay_ms(1);
+    
+      ADMUX = 3;
+      bit_set(ADCSRA, ADSC);
+      while (bit_check(ADCSRA, ADSC)) {}
+      uint16_t adcValue = ADC;
+    
+      //dbg << "ARM: " << adcValue <<endl;
+    
+      if (adcValue > 50){
+        result = 1;
+      } else {
+        result = 0;
+      }
+    
+      pyro.modeOutput();
+      ADCSRA = 0; 
+  }
+  
+  return result;
+
+}
+
+void errorHalt() {
+  while (true) {
+    led.high();
+    _delay_ms(100);
+    led.low();
+    _delay_ms(100);
   }
 }
 
@@ -424,7 +354,7 @@ void calibrate(int16_t mx, int16_t my, int16_t mz)
 {
   if (my < gMinY) gMinY = my;
   if (my > gMaxY) gMaxY = my;
-  gZeroY = (gMinY + gMaxY) / 2;
+  stateData.zeroY = (gMinY + gMaxY) / 2;
 
 }
 
@@ -436,168 +366,61 @@ void calibrateBaro(uint16_t pressure)
   sum += pressure;
   count++;
 
-  gZeroPressure = sum / count;
+  stateData.zeroPressure = sum / count;
 }
 
 void resetCalibration()
 {
   gMinY = 32000;
   gMaxY = -32000;
-  gZeroPressure = 0;
+  stateData.zeroPressure = 0;
+  stateData.maxAltitude = 0;
 }
 
-bool checkFlightPin() {
-  bool result;
-  ADCSRA = _BV(ADPS2) | _BV(ADEN);
-
-  pyro.low();
-  pyro.modeInput();
-  _delay_ms(1);
-
-  ADMUX = 3;
-  bit_set(ADCSRA, ADSC);
-  while (bit_check(ADCSRA, ADSC)) {}
-  uint16_t adcValue = ADC;
-
-  //dbg << "ARM: " << adcValue <<endl;
-
-  result = (adcValue > 50);
-
-  pyro.modeOutput();
-  ADCSRA = 0;
-
-  return result;
-
-}
-
-void errorHalt() {
-  while (true) {
-    buzzer.high();
-    _delay_ms(100);
-    buzzer.low();
-    _delay_ms(100);
-  }
-}
 
 void initSensors() {
   bool magReady = false;
-  for (uint8_t nTry = 10; nTry > 0; nTry--) {
+  for (uint8_t nTry = 3; nTry > 0; nTry--) {
     dbg << "Initializing magfield sensor" << endl;
     magReady = magSensor.begin();
     if (magReady) {
-      magSensor.configure1(0b00000001);  //80 Hz sampilg, active mode
+      magSensor.configure1(0b00000001);  //80 Hz sampling, active mode
       magSensor.configure2(0b10100000);  //auto reset (need test), raw mode
       magSensor.mode(0b00000001);  //active mode RAW
       dbg << "Magnetometer ready" << endl;
       break;
     }
-    delay(500);
+    delay(200);
   }
   if (!magReady) {
     errorHalt();
   }
 
   bool baroReady = false;
-  for (uint8_t nTry = 10; nTry > 0; nTry--) {
+  for (uint8_t nTry = 3; nTry > 0; nTry--) {
     dbg << "Initializing pressure sensor" << endl;
     baroReady = baroSensor.initialize();
     if (baroReady) {
       dbg << "Barometer ready" << endl;
       break;
     }
-    delay(500);
+    delay(200);
   }
   if (!baroReady) {
     errorHalt();
   }
 }
 
-void testLED()
-{
-  led.high();
-  _delay_ms(500);
-  led.low();
-  _delay_ms(1000);
-}
-
-void flashID(uint8_t id)
-{
-  for (uint8_t mask = 0x80; mask > 0; mask >>= 1) {
-    if (id & mask) {
-    }
-    else {
-      led.high();
-    }
-    _delay_ms(400);
-    led.low();
-    _delay_ms(100);
-  }
-}
-
-/*
-void testI2C() {
-  //SoftwareI2C<PortB::pin0, PortB::pin2> bus;
-  uint8_t a;
-  byte rc;
-  uint8_t j=7;
-  rc=ee.begin();
-  //rc=ee.writeByte(5,0x55);
-  //dbg << "FLASH wr: " << rc << endl;
-  //rc=ee.readByte(5,a);  
-  //dbg << "FLASH rd: " << rc << "\t" << a << endl;
-
-  for (uint8_t i=0;i<10;i++){
-    //rc=ee.writeByte(i,(127-i));
-    
-    ee.entry.stateLog=i;
-    ee.entry.pressure=i+50;
-    ee.entry.altitude=i+100;
-    ee.entry.magX=i+200;
-    ee.entry.magY=i+300;
-    ee.entry.magZ=i+400;
-    ee.entry.magT=i+9;
-    ee.writeRecord(i);
-    
-    //_delay_ms(10);
-    //rc=ee.readByte(i,a);  
-    ee.readRecord(i);
-    //dbg << "FLASH rd: " << i << "\t" << a << "\t" << rc <<endl;
-    dbg << i << "\t" << ee.entry.stateLog << "\t" << ee.entry.pressure << "\t" <<ee.entry.altitude << "\t" << ee.entry.magX << "\t" << ee.entry.magY << "\t" << ee.entry.magZ << "\t" << ee.entry.magT <<endl;
-  }
-  errorHalt();
-}
-*/
 void clearFlashLog(){
-  gFlashIndex=0;
-  EEPROM.put(4, gFlashIndex);
+  stateData.flashIndex=0;  
+  //saveState();
+  EEPROM.put(0, stateData);  //save State
 }
-void clearLog()
-{
-  /*
-  for (uint16_t idx = 0; idx < 512; idx++) {
-    EEPROM.write(idx, 0xFF);
-  }
-  */
 
-  uint8_t idx = 0;
-  LogEntry entry;
-  entry.altitude = 0xFFFF;
-  EEPROM.put(10 + 3 * idx, entry);
-}
 
 void updateFlashLog(uint16_t idx){
   ee.writeRecord(idx);
   EEPROM.put(4,idx);
-}
-void updateLog(uint16_t idx)
-{
-  LogEntry entry;
-  entry.mag = (gIsDescent ? 0x01 : 0x00);
-  entry.altitude = gAltitude;
-  EEPROM.put(10 + 3 * idx, entry);
-
-  entry.altitude = 0xFFFF;
-  EEPROM.put(10 + 3 * (idx + 1), entry);
 }
 
 bool reportFlashLog(uint16_t idx){
@@ -613,92 +436,22 @@ bool reportFlashLog(uint16_t idx){
   T1=T1+T;
   dbg << idx << ',' << ee.entry.stateLog << ',' << ee.entry.pressure << ',' <<ee.entry.altitude << ',' << ee.entry.magX << ',' << ee.entry.magY << ',' << ee.entry.magZ << ',' << T <<endl;
 }
-bool reportLog(uint16_t idx)
+
+void reportState()
 {
-  LogEntry entry;
-  EEPROM.get(10 + 3 * idx, entry);
-  if (entry.altitude != 0xFFFF) {
-    //dbg << idx << '\t' << entry.mag << '\t' << entry.altitude << endl;
-    return true;
-  }
-  return false;
+  dbg << "zeroPressure,zeroY,flashIndex,maxAltitude" << endl;
+  dbg << stateData.zeroPressure << "," << stateData.zeroY << "," << stateData.flashIndex << "," << stateData.maxAltitude << endl;
+  
 }
 
+/*
 void restoreState()
-{
-  uint16_t maxAlt = 0;
-  // Find the last entry in EEPROM
-  uint16_t idx = 0;
-  while (idx < kLOG_SIZE) {
-    LogEntry entry;
-    EEPROM.get(10 + 3 * idx, entry);
-    if (entry.altitude == 0xFFFF) break;
-
-    if (entry.altitude > maxAlt) {
-      maxAlt = entry.altitude;
-    }
-    if (entry.mag & 1) gIsDescent = true;
-
-    idx++;
-  }
-  gLogIndex = idx;
-  setMaxAltitude(maxAlt);
-
-  // restore gMaxAltitude
-  //EEPROM.get(0, gMaxAltitude);
-  //if (gMaxAltitude == 0xFFFF) gMaxAltitude = 0;
-  EEPROM.get(0, gZeroPressure);
-  EEPROM.get(2, gZeroY);
-  EEPROM.get(4, gFlashIndex);
+  EEPROM.get(0, stateData);
 }
 
 void saveState()
 {
-  // save gMaxAltitude
-  //EEPROM.put(0, gMaxAltitude);
-
-  EEPROM.put(0, gZeroPressure);
-  EEPROM.put(2, gZeroY);
-  EEPROM.put(4, gFlashIndex);
+  EEPROM.put(0, stateData);
 }
 
-uint8_t lookupMorse(char c)
-{
-  if (c < '0' || c > '9') return 0;
-
-  uint8_t idx = 0;
-  uint8_t code = 0;
-  uint8_t length = 5;
-  uint8_t digit = c - '0';
-  if (digit <= 5) {
-    for (; idx < 5 - digit; idx++) {
-      code <<= 1;
-      code |= 1;
-    }
-    for (; idx < 5; idx++) {
-      code <<= 1;
-      code |= 0;
-    }
-  }
-  else {
-    for (; idx < 10 - digit; idx++) {
-      code <<= 1;
-      code |= 0;
-    }
-    for (; idx < 5; idx++) {
-      code <<= 1;
-      code |= 1;
-    }
-  }
-  code |= (length << 5);
-  return code;
-}
-
-void setMaxAltitude(uint16_t altitude) {
-  gMaxAltitude = altitude;
-
-  // Convert maximum altitude to decimal form
-  TextOutStream<StringBuf> gMessageStr;
-  gMessageStr.assign((char *)gMessage, 6);
-  gMessageStr << gMaxAltitude << '\0';
-}
+*/
