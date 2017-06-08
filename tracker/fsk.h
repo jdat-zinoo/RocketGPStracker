@@ -2,25 +2,6 @@
 
 #include "Arduino.h"
 
-// A1 pin
-#define txDir DDRC
-#define txPort PORTC
-#define txPin PINC1
-
-#define frequency 433.92f
-#define radioCsPin 9
-#define radioResetPin 2
-
-#ifndef cbi
-#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
-#endif
-#ifndef sbi
-#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
-#endif 
-
-//#define bit_set(byte, bit)    ((byte) |= (1 << (bit)))
-//#define bit_clear(byte, bit)  ((byte) &= ~(1 << (bit)))
-
 class FSKTransmitter {
 public:
   FSKTransmitter();

@@ -1,30 +1,40 @@
 #include "fsk.h"
 
+
+//#define rttyOff {DDRD|=B00010000; PORTD&=B11100111;}  //ON/OFF Output high, data maybe input
+#define rttyLow {DDRD&=B11101111; DDRD|=B00001000; PORTD&=B11101111;} //ON/OFF pin input; data pin output LOW
+#define rttyHigh {DDRD&=B11100111; PORTD&=B11100111;}  //Both pins input
+//#define rttyHigh DDRD&=B11101111; DDRD|=B00001000;PORTD&=B11101111 //ON/OFF pin input, data pin output high
+
+
+
 FSKTransmitter::FSKTransmitter() {
   autoShutdown = false;
   txLength = 0;
   bitIndex = 0;
   active = false;
-  
 }
+
 
 void FSKTransmitter::mark() {
-  //rttyHigh;
-  sbi(txPort,txPin);
+  rttyHigh;
 }
 
+
 void FSKTransmitter::space() {
-  //rttyLow;
-  cbi(txPort,txPin);
+  rttyLow;
 }
+
 
 void FSKTransmitter::enable() {
   //
 }
 
+
 void FSKTransmitter::disable() {
   //
 }
+
 
 void FSKTransmitter::transmit(const uint8_t *buffer, uint16_t length) {
   if (active) return;

@@ -3,7 +3,7 @@
 
  AtTiny85, magnetometer (MAG3110), eject output pin, buzzer, LED.
  The eject output serves also as a safe/flight pin.
- ATTiny85 is connected via USI bus to an I2C slave device (MAG3110).
+ ATTiny85 is connected via USI bus to an I2C slave devices (MAG3110).
  
  AtTiny85 fuses:
  LFUSE 	= 0xE2
@@ -30,10 +30,9 @@
 
 const int kLOG_SIZE = 160;      // 3 bytes per entry
 
-const uint16_t flashSize=5460;  //entries in I2C EEPROM
-//const uint16_t flashSize=50;  //entries in I2C EEPROM
 
 const uint8_t kTIMER1_DIV4096 = 0b1101;
+
 DigitalOut<PortB::pin3> pyro;
 DigitalOut<PortB::pin1> led;
 
@@ -45,6 +44,11 @@ I2C bus;
 BarometerSimple baroSensor(bus);
 MAG3110 magSensor;
 flash ee;
+
+//uint16_t flashSize;  //entries in I2C EEPROM
+const uint16_t flashSize=65536/sizeof(ee.entry);  //entries in I2C EEPROM
+//const uint16_t flashSize=50;  //entries in I2C EEPROM
+
 
 // structure for restart protected data
 struct _stateData {
@@ -70,10 +74,12 @@ enum {
 };
 
 // in SAFE mode calibrating. in FLIGHT mode measuring ??? Why? must be resolved
+/*
 enum {
   kFLAG_MEASURE,
   kFLAG_CAL
 };
+*/
 
 // minimum and maximum for magnetometer Y axis
 int16_t gMinY, gMaxY;
@@ -85,7 +91,7 @@ volatile uint8_t    gPyroOn=0;    // if this !=0 then pyro will shoot. Be carefu
 volatile uint8_t gBuzzerMode;     // buzzer state variable
 uint16_t gAltitude;               // current altitude
 
-volatile uint8_t gFlags;          // some system flags ??? must be resolved
+volatile uint8_t gFlagMeasure;          // some system flags ??? must be resolved
 
 _stateData stateData;             // restart protected data
 
@@ -113,7 +119,10 @@ void setup()
   dbg.begin();        // init serial output
 
   dbg << "Reset" << endl;   // we are booting
-
+  
+  //dbg << sizeof(ee.entry) << endl;
+  //dbg << flashSize << endl;
+  
   //clearFlash();
   
   // Setup measurement timer. 10 IRQs per second
@@ -126,7 +135,8 @@ void setup()
   sei();
 
   initSensors();
-  EEPROM.get(0, stateData);  //restoreState
+  restoreState();
+  //EEPROM.get(0, stateData);  //restoreState
 
   reportState();      // dump state data (internal eeprom) to serial
   
@@ -146,9 +156,11 @@ void loop()
 {
   static uint16_t rFlashIndex;      //I2C EEPROM flash index for reading and data dumping only.
 
-  if (bit_check(gFlags, kFLAG_MEASURE)) {       //we got main instructions form timer to exeute main loop
-    bit_clear(gFlags, kFLAG_MEASURE);           // reset flag, amd wait for next chance from timer
-
+  //if (bit_check(gFlags, kFLAG_MEASURE)) {       //we got main instructions form timer to exeute main loop
+  //  bit_clear(gFlags, kFLAG_MEASURE);           // reset flag, amd wait for next chance from timer
+  if (gFlagMeasure==1) {
+    gFlagMeasure=0;
+    
     // Get sensor measurements
     int16_t   mx, my, mz;
     uint16_t  pressure, pressureComp;
@@ -180,7 +192,10 @@ void loop()
     ee.entry.pressure=pressureComp;
     ee.entry.altitude=gAltitude;
 
+#ifdef DEBUG
 //dbg << mx << "," << my << "," << mz << "," << gZeroY << endl;
+dbg << mx << "," << ee.entry.magX << "---" << my << "," << ee.entry.magY << "---" << mz << "," << ee.entry.magZ << endl;
+#endif
 
     // this is tricky, must be fixed
     bool doEject = magOK && (my > stateData.zeroY);     //depending on electronic orientation use ">" or "<"
@@ -206,12 +221,6 @@ void loop()
       if (baroOK) calibrateBaro(pressure);
 
            
-      if (rFlashIndex<stateData.flashIndex){
-        reportFlashLog(rFlashIndex++);
-      } else {
-        rFlashIndex=0;
-        reportState();
-      }
       // Check if state has changed
       if (checkFlightPin()==1) {
         gState = kSTATE_FLIGHT;
@@ -250,8 +259,8 @@ void loop()
         updateFlashLog(stateData.flashIndex++);
         
       }
-      //saveState(); //automatically saves flash memory index
-      EEPROM.put(0, stateData);  //save State //automatically saves flash memory index
+      saveState(); //automatically saves flash memory index
+      //EEPROM.put(0, stateData);  //save State //automatically saves flash memory index
       
       // Check if state has changed
       if (checkFlightPin()==0) {
@@ -265,7 +274,18 @@ void loop()
     }
   }
 
-  sleep_mode();
+  if (gState == kSTATE_SAFE) {
+    if (rFlashIndex<stateData.flashIndex){
+      reportFlashLog(rFlashIndex++);
+    } else {
+      rFlashIndex=0;
+      reportState();
+      dbg << "idx,state,press,alt,X,Y,Z,T" << endl;   // header for I2C EEPROM data. dirty hack
+    }
+    
+  } else if (gState == kSTATE_FLIGHT) {
+    sleep_mode();
+  }
 }
 
 volatile uint8_t cnt2;
@@ -281,7 +301,8 @@ ISR(TIMER1_COMPA_vect) {
   if (++cnt2 >= 10) {
     cnt2 = 0;
   }
-    bit_set(gFlags, kFLAG_MEASURE);
+    //bit_set(gFlags, kFLAG_MEASURE);
+    gFlagMeasure=1;
 
   if ( (gPyroOn!=0) && (cnt2 < 5) ) {
     pyro.high();
@@ -347,6 +368,7 @@ void errorHalt() {
     _delay_ms(100);
     led.low();
     _delay_ms(100);
+    dbg << "Halted!" <<endl;
   }
 }
 
@@ -413,45 +435,33 @@ void initSensors() {
 
 void clearFlashLog(){
   stateData.flashIndex=0;  
-  //saveState();
-  EEPROM.put(0, stateData);  //save State
+  saveState();
+  //EEPROM.put(0, stateData);  //save State
 }
 
 
 void updateFlashLog(uint16_t idx){
   ee.writeRecord(idx);
-  EEPROM.put(4,idx);
+  saveState();
 }
 
 bool reportFlashLog(uint16_t idx){
   ee.readRecord(idx);
-  uint8_t T;
-  int T1;
-  T=ee.entry.magT;
-  if (bit_check(T,7)){
-    T1=-1;
-  }
-  T=T<<1;
-  T=T>>1;
-  T1=T1+T;
-  dbg << idx << ',' << ee.entry.stateLog << ',' << ee.entry.pressure << ',' <<ee.entry.altitude << ',' << ee.entry.magX << ',' << ee.entry.magY << ',' << ee.entry.magZ << ',' << T <<endl;
+  #ifndef DEBUG
+  dbg << idx << ',' << ee.entry.stateLog << ',' << ee.entry.pressure << ',' <<ee.entry.altitude << ',' << ee.entry.magX << ',' << ee.entry.magY << ',' << ee.entry.magZ << ',' << ee.entry.magT <<endl;
+  #endif
 }
 
-void reportState()
-{
+void reportState(){
   dbg << "zeroPressure,zeroY,flashIndex,maxAltitude" << endl;
-  dbg << stateData.zeroPressure << "," << stateData.zeroY << "," << stateData.flashIndex << "," << stateData.maxAltitude << endl;
-  
+  dbg << stateData.zeroPressure << "," << stateData.zeroY << "," << stateData.flashIndex << "," << stateData.maxAltitude << endl;  
 }
 
-/*
-void restoreState()
+void restoreState() {
   EEPROM.get(0, stateData);
 }
 
-void saveState()
-{
+void saveState() {
   EEPROM.put(0, stateData);
 }
 
-*/
