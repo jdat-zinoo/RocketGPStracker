@@ -5,7 +5,7 @@
 // A1 pin
 #define txDir DDRC
 #define txPort PORTC
-#define txPin PINC1
+#define txPin PINC2
 
 #define frequency 433.92f
 #define radioCsPin 9

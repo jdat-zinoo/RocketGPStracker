@@ -2,8 +2,8 @@
 //  Configuration
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //select GPS module
-//#define a2235h
-#define org1411
+#define a2235h
+//#define org1411
 
 #define maxPower 31   //maximum tx power=-18dBm + value
 
@@ -67,10 +67,10 @@ const  uint8_t minSats=3;       //minimums Satelittes in GPS view for good fix
 #include <EEPROM.h>
 #include "TinyGPS.h"
 
-//const int txpin = A1;     //RTTY pin
+//const int txpin = A2;     //RTTY pin
 #define txDir DDRC
 #define txPort PORTC
-#define txPin PINC1
+#define txPin PINC2
 
 //const int pinBeeper = 6;  // beeper
 #define beepDir DDRD
@@ -238,6 +238,14 @@ void setup()
 void loop()
 {
 
+//  for(;;){
+//    sbi(txPort,txPin);
+//    delay(1000);
+//    cbi(txPort,txPin);
+//    delay(1000);
+//
+//  }
+  
   // Read all characters from serial buffer and decode GPS data
   //this part is module independent because SiRFGPS and TinyGPS patched for identical interface
   while (Serial.available()) {        
@@ -250,15 +258,15 @@ void loop()
   }  
 
   // tx on/off logic
-  if ( millis() > txEvent ) {
-    if (txOn==1) {
-      txOn=0;
-      txEvent=millis()+offTxTime;
-    } else {
-      txOn=1;
-      txEvent=millis()+onTxTime;
-    }   
-  }
+//  if ( millis() > txEvent ) {
+//    if (txOn==1) {
+//      txOn=0;
+//      txEvent=millis()+offTxTime;
+//    } else {
+//      txOn=1;
+//      txEvent=millis()+onTxTime;
+//    }   
+//  }
 
   // if transmitter not transmitting then sreate new sata string
   if (!tx.isBusy()) {
