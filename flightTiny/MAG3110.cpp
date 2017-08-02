@@ -29,6 +29,8 @@
 #define regCTRL_REG2 0x11
 
 
+//TextOutStream<SoftwareSerialOut<DigitalOut<PortB::pin4>, 9600> > dbg1;
+
 bool MAG3110::begin(void) {
   //slaveAddress = (SA1pin) ? 0b0011110 : 0b0011100;
   //dbg.begin();
@@ -111,6 +113,13 @@ bool MAG3110::readMagY(int16_t &value) {
 
 bool MAG3110::readMagZ(int16_t &value) {
   return readWord(regOUT_Z_MSB, (uint16_t *)&value);
+}
+
+uint8_t MAG3110::readMagT() {
+  uint8_t rc;
+  readByte(regDIE_TEMP, &rc);
+  //dbg1 << "T:" << rc << "\r\n";
+  return rc;
 }
 
 bool MAG3110::readMag(int16_t &xvalue, int16_t &yvalue, int16_t &zvalue) {

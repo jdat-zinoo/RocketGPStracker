@@ -4,6 +4,12 @@
 //#define byte uint8_t
 #include <Arduino.h>
 
+//#include <stdint.h>
+//#include <inttypes.h>
+
+//typedef uint8_t byte;
+//typedef uint16_t word;
+
 class I2C {
 public:
   I2C();
