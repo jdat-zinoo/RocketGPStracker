@@ -10,7 +10,7 @@
 const unsigned long onTx=5;     //transmiiter on time in minutes
 const unsigned long offTx=2;    //transmitter off time in minutes
 
-const int kBaudRate = 50;       //RTTY baud rate
+const int kBaudRate = 300;       //RTTY baud rate
 const int beepFreq=50;        //beeper tone frequncy. used only when passive beeper
 
 //Beeper time config
@@ -23,7 +23,7 @@ const uint8_t offTimeBad=5;     //0.5sec on
 
 /*
  * Atmega fuses: (E:FE, H:DA, L:FF)
- * Externeal qautz oscillatopr 8 MHz, 3.3V, Brownout 1.8V
+ * Externeal qautz oscillatopr 8 MHz, 3.3V, Brownout off
  * No Watchog!!!
  * Arduino pro mini bootloader
 */
@@ -188,8 +188,12 @@ void setup()
   pinMode(radioResetPin,INPUT);
   delay(10);  
 
+
+
+  
   //init radio with libary functions
   radio.initialize();  
+
  
   //Set radio frequency manual
   #ifdef org1411
@@ -356,7 +360,7 @@ ISR(TIMER2_COMPA_vect) {
   static uint16_t cnt;
   tx.tick();
   cnt++;
-  if (++cnt >= kBaudRate/10) {
+  if (cnt >= kBaudRate/10) {
   //if (++cnt >= brDiv) {       //for wariable baudrate
     cnt = 0;
     g100ms++;
