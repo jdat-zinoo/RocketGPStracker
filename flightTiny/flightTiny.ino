@@ -193,8 +193,8 @@ void loop()
     ee.entry.altitude=gAltitude;
 
 #ifdef DEBUG
-//dbg << mx << "," << my << "," << mz << "," << gZeroY << endl;
-dbg << mx << "," << ee.entry.magX << "---" << my << "," << ee.entry.magY << "---" << mz << "," << ee.entry.magZ << endl;
+dbg << mx << "," << my << "," << mz << "," << stateData.zeroY << endl;
+//dbg << mx << "," << ee.entry.magX << "---" << my << "," << ee.entry.magY << "---" << mz << "," << ee.entry.magZ << endl;
 #endif
 
     // this is tricky, must be fixed
