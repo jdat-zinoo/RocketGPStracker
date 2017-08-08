@@ -15,6 +15,8 @@
  * Preserve EEPROM memory
 *************************************************************************/
 
+#define pyroDelay 5
+
 //#define DEBUG   1
 
 #include <EEPROM.h>
@@ -57,6 +59,7 @@ struct _stateData {
   uint16_t flashIndex;          // last entry in I2C EEPROM flash
   uint16_t maxAltitude;         // max Altitude
   volatile uint8_t isDescent;   // for some unknown state ??? must be resolved
+  volatile uint16_t cnt3;
 };
 
 // arm pin state
@@ -93,7 +96,9 @@ uint16_t gAltitude;               // current altitude
 
 volatile uint8_t gFlagMeasure;          // some system flags ??? must be resolved
 
-_stateData stateData;             // restart protected data
+volatile _stateData stateData;             // restart protected data
+
+//volatile uint16_t cnt3=0;
 
 // this will erase all eeprom contents. must be optimised
 void clearFlash(){
@@ -111,225 +116,6 @@ void clearFlash(){
   
 }
 
-void setup()
-{
-  gPyroOn=0;          // just in case no shoot at this point
-  
-  TinyWireM.begin();  // init I2C
-  dbg.begin();        // init serial output
-
-  dbg << "Reset" << endl;   // we are booting
-  
-  //dbg << sizeof(ee.entry) << endl;
-  //dbg << flashSize << endl;
-  
-  //clearFlash();
-  
-  // Setup measurement timer. 10 IRQs per second
-  TCCR1 = _BV(CTC1) | kTIMER1_DIV4096;
-  //TCCR1 = kTIMER1_DIV512;
-  OCR1C = 193;
-  OCR1A = OCR1C;
-  TIMSK |= _BV(OCIE1A);
-
-  sei();
-
-  initSensors();
-  restoreState();
-  //EEPROM.get(0, stateData);  //restoreState
-
-  reportState();      // dump state data (internal eeprom) to serial
-  
-  dbg << "idx,state,press,alt,X,Y,Z,T" << endl;   // header for I2C EEPROM data. dirty hack
-  if (checkFlightPin()==1) {
-    gState = kSTATE_FLIGHT;
-  }
-  else {
-    gState = kSTATE_SAFE;
-    resetCalibration();       // something messy. neet to check
-    //setMaxAltitude(0);
-    //stateData.maxAltitude = 0;
-  }
-}
-
-void loop()
-{
-  static uint16_t rFlashIndex;      //I2C EEPROM flash index for reading and data dumping only.
-
-  //if (bit_check(gFlags, kFLAG_MEASURE)) {       //we got main instructions form timer to exeute main loop
-  //  bit_clear(gFlags, kFLAG_MEASURE);           // reset flag, amd wait for next chance from timer
-  if (gFlagMeasure==1) {
-    gFlagMeasure=0;
-    
-    // Get sensor measurements
-    int16_t   mx, my, mz;
-    uint16_t  pressure, pressureComp;
-    bool magOK = magSensor.readMag(mx, my, mz);
-    bool baroOK = baroSensor.update();
-
-    // store data in I2C EEPROm structure for logging
-    ee.entry.magX=mx;
-    ee.entry.magY=my;
-    ee.entry.magZ=mz;
-    ee.entry.magT=magSensor.readMagT();
-
-    // Calculate altitude wrt to zero ground pressure
-    if (baroOK) {
-      pressure = baroSensor.getPressure();
-
-      //dbg << pressure <<endl;
-
-      if (stateData.zeroPressure != 0) {
-        pressureComp = (uint32_t)pressure * 25325 / stateData.zeroPressure;
-      }
-      else {
-        pressureComp = pressure;
-      }
-      gAltitude = baroSensor.getAltitude(pressureComp);
-    }
-
-    // store data in I2C EEPROm structure for logging
-    ee.entry.pressure=pressureComp;
-    ee.entry.altitude=gAltitude;
-
-#ifdef DEBUG
-dbg << mx << "," << my << "," << mz << "," << stateData.zeroY << endl;
-//dbg << mx << "," << ee.entry.magX << "---" << my << "," << ee.entry.magY << "---" << mz << "," << ee.entry.magZ << endl;
-#endif
-
-    // this is tricky, must be fixed
-    bool doEject = magOK && (my > stateData.zeroY);     //depending on electronic orientation use ">" or "<"
-
-    // hack to store some system state in I2C EEPROM
-    uint8_t xxx=0;
-    xxx=(gState & 0x1)<<7;
-    xxx=xxx | ((doEject & 0x1)<<6);
-    xxx=xxx | ((gBuzzerMode & 0x3) <<4);
-    xxx=xxx | ((stateData.isDescent & 0x1 ) <<3);
-    ee.entry.stateLog=xxx;
-
-    if (gState == kSTATE_SAFE) {
-      // SAFE state
-      // * indicate eject event on the led
-      // * calibrate magnetic sensor range
-      // * calibrate reference (ground) pressure value
-      // * dump log data on serial port (LED)
-
-      gBuzzerMode = doEject ? kBUZZER_TEST : kBUZZER_SILENT;
-
-      if (magOK) calibrate(mx, my, mz);
-      if (baroOK) calibrateBaro(pressure);
-
-           
-      // Check if state has changed
-      if (checkFlightPin()==1) {
-        gState = kSTATE_FLIGHT;
-        stateData.maxAltitude=0;
-        stateData.isDescent = false;
-        //saveState();
-        clearFlashLog(); //Also saves all state
-        //gLogIndex = 0;
-        
-      }
-    }
-    else if (gState == kSTATE_FLIGHT) {
-      // FLIGHT state
-      // * manage eject (repeat 3 times)
-      // * compute altitude
-      // * update and store log data
-
-      dbg << stateData.flashIndex <<  endl;
-      if (gAltitude > stateData.maxAltitude) {
-        stateData.maxAltitude=gAltitude;
-      }
-
-      if (doEject) {
-        gPyroOn=1;
-        stateData.isDescent = true;        
-      }
-      else {
-        gPyroOn=0;
-      }
-
-      gBuzzerMode = stateData.isDescent ? kBUZZER_DESCENT : kBUZZER_ASCENT;
-
-      //if (gLogIndex < kLOG_SIZE) {updateLog(gLogIndex++);}
-
-      if (stateData.flashIndex<flashSize){
-        updateFlashLog(stateData.flashIndex++);
-        
-      }
-      saveState(); //automatically saves flash memory index
-      //EEPROM.put(0, stateData);  //save State //automatically saves flash memory index
-      
-      // Check if state has changed
-      if (checkFlightPin()==0) {
-        gState = kSTATE_SAFE;
-        resetCalibration();
-        gPyroOn = 0;
-        rFlashIndex=0;
-        reportState();
-        dbg << "idx,state,press,alt,X,Y,Z,T" << endl;
-      }
-    }
-  }
-
-  if (gState == kSTATE_SAFE) {
-    if (rFlashIndex<stateData.flashIndex){
-      reportFlashLog(rFlashIndex++);
-    } else {
-      rFlashIndex=0;
-      reportState();
-      dbg << "idx,state,press,alt,X,Y,Z,T" << endl;   // header for I2C EEPROM data. dirty hack
-    }
-    
-  } else if (gState == kSTATE_FLIGHT) {
-    sleep_mode();
-  }
-}
-
-volatile uint8_t cnt2;
-
-ISR(TIMER1_COMPA_vect) {
-  //TCNT1 = 0;
-  static uint8_t cnt1;
-  
-  if (++cnt1 >= 30) {
-    cnt1 = 0;
-  }
-  
-  if (++cnt2 >= 10) {
-    cnt2 = 0;
-  }
-    //bit_set(gFlags, kFLAG_MEASURE);
-    gFlagMeasure=1;
-
-  if ( (gPyroOn!=0) && (cnt2 < 5) ) {
-    pyro.high();
-    shoot=1;
-  } else {
-    pyro.low();
-    shoot=0;
-  }
-  
-  switch (gBuzzerMode) {
-  case kBUZZER_SILENT:
-    led.low();
-    break;
-  case kBUZZER_TEST:
-    led.high();
-    break;
-  case kBUZZER_ASCENT:
-    if (cnt1 < 2 || (cnt1 > 8 && cnt1 < 15)) led.high();
-    else led.low();
-    break;
-  case kBUZZER_DESCENT:    
-    if (cnt1 < 2 || (cnt1 > 8 && cnt1 < 15)) led.high();
-    else led.low();
-    break;
-
-  }
-}
 
 int checkFlightPin() {
   int result=-1;
@@ -391,8 +177,7 @@ void calibrateBaro(uint16_t pressure)
   stateData.zeroPressure = sum / count;
 }
 
-void resetCalibration()
-{
+void resetCalibration(){
   gMinY = 32000;
   gMaxY = -32000;
   stateData.zeroPressure = 0;
@@ -463,5 +248,238 @@ void restoreState() {
 
 void saveState() {
   EEPROM.put(0, stateData);
+}
+
+void setup()
+{
+  gPyroOn=0;          // just in case no shoot at this point
+  
+  TinyWireM.begin();  // init I2C
+  dbg.begin();        // init serial output
+
+  dbg << "Reset" << endl;   // we are booting
+  
+  //dbg << sizeof(ee.entry) << endl;
+  //dbg << flashSize << endl;
+  
+  //clearFlash();
+  
+  // Setup measurement timer. 10 IRQs per second
+  cli();
+  TCCR1 = _BV(CTC1) | kTIMER1_DIV4096;
+  //TCCR1 = kTIMER1_DIV512;
+  OCR1C = 193;
+  OCR1A = OCR1C;
+  TIMSK |= _BV(OCIE1A);
+
+  sei();
+
+  stateData.isDescent = false;
+  
+  initSensors();
+  restoreState();
+  //EEPROM.get(0, stateData);  //restoreState
+
+  reportState();      // dump state data (internal eeprom) to serial
+  
+  dbg << "idx,state,press,alt,X,Y,Z,T" << endl;   // header for I2C EEPROM data. dirty hack
+  if (checkFlightPin()==1) {
+    gState = kSTATE_FLIGHT;
+  }
+  else {
+    gState = kSTATE_SAFE;
+    stateData.isDescent = false; 
+    resetCalibration();       // something messy. neet to check
+    //setMaxAltitude(0);
+    //stateData.maxAltitude = 0;
+  }
+}
+
+void loop()
+{
+  static uint16_t rFlashIndex;      //I2C EEPROM flash index for reading and data dumping only.
+
+  //if (bit_check(gFlags, kFLAG_MEASURE)) {       //we got main instructions form timer to exeute main loop
+  //  bit_clear(gFlags, kFLAG_MEASURE);           // reset flag, amd wait for next chance from timer
+  if (gFlagMeasure==1) {
+    gFlagMeasure=0;
+    
+    // Get sensor measurements
+    int16_t   mx, my, mz;
+    uint16_t  pressure, pressureComp;
+    bool magOK = magSensor.readMag(mx, my, mz);
+    bool baroOK = baroSensor.update();
+
+    // store data in I2C EEPROm structure for logging
+    ee.entry.magX=mx;
+    ee.entry.magY=my;
+    ee.entry.magZ=mz;
+    ee.entry.magT=magSensor.readMagT();
+
+    // Calculate altitude wrt to zero ground pressure
+    if (baroOK) {
+      pressure = baroSensor.getPressure();
+
+      //dbg << pressure <<endl;
+
+      if (stateData.zeroPressure != 0) {
+        pressureComp = (uint32_t)pressure * 25325 / stateData.zeroPressure;
+      }
+      else {
+        pressureComp = pressure;
+      }
+      gAltitude = baroSensor.getAltitude(pressureComp);
+    }
+
+    // store data in I2C EEPROm structure for logging
+    ee.entry.pressure=pressureComp;
+    ee.entry.altitude=gAltitude;
+
+#ifdef DEBUG
+dbg << mx << "," << my << "," << mz << "," << stateData.zeroY << endl;
+//dbg << mx << "," << ee.entry.magX << "---" << my << "," << ee.entry.magY << "---" << mz << "," << ee.entry.magZ << endl;
+#endif
+
+    // this is tricky, must be fixed
+    bool doEject = magOK && (my < stateData.zeroY);     //depending on electronic orientation use ">" or "<"
+
+    // hack to store some system state in I2C EEPROM
+    uint8_t xxx=0;
+    xxx=(gState & 0x1)<<7;
+    xxx=xxx | ((doEject & 0x1)<<6);
+    xxx=xxx | ((gBuzzerMode & 0x3) <<4);
+    xxx=xxx | ((stateData.isDescent & 0x1 ) <<3);
+    ee.entry.stateLog=xxx;
+
+    if (gState == kSTATE_SAFE) {
+      // SAFE state
+      // * indicate eject event on the led
+      // * calibrate magnetic sensor range
+      // * calibrate reference (ground) pressure value
+      // * dump log data on serial port (LED)
+
+      gBuzzerMode = doEject ? kBUZZER_TEST : kBUZZER_SILENT;
+
+      if (magOK) calibrate(mx, my, mz);
+      if (baroOK) calibrateBaro(pressure);
+
+           
+      // Check if state has changed
+      if (checkFlightPin()==1) {
+        gState = kSTATE_FLIGHT;
+        stateData.cnt3=0;
+        stateData.maxAltitude=0;
+        stateData.isDescent = false;
+        //saveState();
+        clearFlashLog(); //Also saves all state
+        //gLogIndex = 0;
+        
+      }
+    }
+    else if (gState == kSTATE_FLIGHT) {
+      // FLIGHT state
+      // * manage eject (repeat 3 times)
+      // * compute altitude
+      // * update and store log data
+
+      dbg << stateData.flashIndex <<  endl;
+      if (gAltitude > stateData.maxAltitude) {
+        stateData.maxAltitude=gAltitude;
+      }
+
+      if (doEject) {
+        //gPyroOn=1;
+        stateData.isDescent = true;        
+      }
+      //else {
+        //gPyroOn=0;
+      //}
+
+      gBuzzerMode = stateData.isDescent ? kBUZZER_DESCENT : kBUZZER_ASCENT;
+
+      //if (gLogIndex < kLOG_SIZE) {updateLog(gLogIndex++);}
+
+      if (stateData.flashIndex<flashSize){
+        updateFlashLog(stateData.flashIndex++);
+        
+      }
+      saveState(); //automatically saves flash memory index
+      //EEPROM.put(0, stateData);  //save State //automatically saves flash memory index
+      
+      // Check if state has changed
+      if (checkFlightPin()==0) {
+        gState = kSTATE_SAFE;
+        resetCalibration();
+        stateData.isDescent = false;
+        stateData.cnt3=0;
+        gPyroOn = 0;
+        rFlashIndex=0;
+        reportState();
+        dbg << "idx,state,press,alt,X,Y,Z,T" << endl;
+      }
+    }
+  }
+
+  if (gState == kSTATE_SAFE) {
+    if (rFlashIndex<stateData.flashIndex){
+      reportFlashLog(rFlashIndex++);
+    } else {
+      rFlashIndex=0;
+      reportState();
+      dbg << "idx,state,press,alt,X,Y,Z,T" << endl;   // header for I2C EEPROM data. dirty hack
+    }
+    
+  } else if (gState == kSTATE_FLIGHT) {
+    sleep_mode();
+  }
+}
+
+volatile uint8_t cnt2;
+
+ISR(TIMER1_COMPA_vect) {
+  //TCNT1 = 0;
+  static uint8_t cnt1;
+
+  if ( (stateData.isDescent == true) && (++stateData.cnt3 >= (pyroDelay*10)) ){
+      gPyroOn = 1;
+  } else {
+      gPyroOn = 0;
+  }
+  
+  if (++cnt1 >= 30) {
+    cnt1 = 0;
+  }
+  
+  if (++cnt2 >= 10) {
+    cnt2 = 0;
+  }
+    //bit_set(gFlags, kFLAG_MEASURE);
+    gFlagMeasure=1;
+
+  if ( (gPyroOn!=0) && (cnt2 < 5) ) {
+    pyro.high();
+    shoot=1;
+  } else {
+    pyro.low();
+    shoot=0;
+  }
+  
+  switch (gBuzzerMode) {
+  case kBUZZER_SILENT:
+    led.low();
+    break;
+  case kBUZZER_TEST:
+    led.high();
+    break;
+  case kBUZZER_ASCENT:
+    if (cnt1 < 2 || (cnt1 > 8 && cnt1 < 15)) led.high();
+    else led.low();
+    break;
+  case kBUZZER_DESCENT:    
+    if (cnt1 < 2 || (cnt1 > 8 && cnt1 < 15)) led.high();
+    else led.low();
+    break;
+
+  }
 }
 
