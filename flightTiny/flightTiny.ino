@@ -15,7 +15,7 @@
  * Preserve EEPROM memory
 *************************************************************************/
 
-#define pyroDelay 5
+#define pyroDelay 1   //shoot delay in seconds
 
 //#define DEBUG   1
 
@@ -139,7 +139,8 @@ int checkFlightPin() {
       } else {
         result = 0;
       }
-    
+
+      pyro.low();
       pyro.modeOutput();
       ADCSRA = 0; 
   }
@@ -253,6 +254,10 @@ void saveState() {
 void setup()
 {
   gPyroOn=0;          // just in case no shoot at this point
+
+  shoot=0;
+  
+  stateData.isDescent = false;
   
   TinyWireM.begin();  // init I2C
   dbg.begin();        // init serial output
@@ -265,7 +270,10 @@ void setup()
   //clearFlash();
   
   // Setup measurement timer. 10 IRQs per second
-  cli();
+
+  initSensors();
+  
+  //cli();
   TCCR1 = _BV(CTC1) | kTIMER1_DIV4096;
   //TCCR1 = kTIMER1_DIV512;
   OCR1C = 193;
@@ -274,10 +282,9 @@ void setup()
 
   sei();
 
-  stateData.isDescent = false;
-  
-  initSensors();
   restoreState();
+  //errorHalt();
+  
   //EEPROM.get(0, stateData);  //restoreState
 
   reportState();      // dump state data (internal eeprom) to serial
@@ -290,6 +297,7 @@ void setup()
     gState = kSTATE_SAFE;
     stateData.isDescent = false; 
     resetCalibration();       // something messy. neet to check
+    stateData.cnt3=0;
     //setMaxAltitude(0);
     //stateData.maxAltitude = 0;
   }
@@ -456,7 +464,7 @@ ISR(TIMER1_COMPA_vect) {
     //bit_set(gFlags, kFLAG_MEASURE);
     gFlagMeasure=1;
 
-  if ( (gPyroOn!=0) && (cnt2 < 5) ) {
+  if ( (gPyroOn==1) && (cnt2 < 5) ) {
     pyro.high();
     shoot=1;
   } else {
