@@ -6,6 +6,7 @@
 //#define org1411
 
 #define maxPower 31   //maximum tx power=-18dBm + value
+#define TX_FREQ_MHZ   868.25
 
 const unsigned long onTx=5;     //transmiiter on time in minutes
 const unsigned long offTx=2;    //transmitter off time in minutes
@@ -145,7 +146,7 @@ void powerCal(){
     
     EEPROM.update(0,wr);  //protected store lower power for next reboot
     //  set TX power
-    radio.writeReg(REG_OCP,0x10111);
+    radio.writeReg(REG_OCP,0b10111);
     radio.writeReg(REG_TESTPA1,0x55);
     radio.writeReg(REG_TESTPA2,0x70);
     radio.writeReg(REG_PALEVEL,( 0b01100000 | curPower ) );
@@ -194,23 +195,12 @@ void setup()
   //init radio with libary functions
   radio.initialize();  
 
- 
-  //Set radio frequency manual
-  #ifdef org1411
-    radio.writeReg(REG_FRFMSB,0x6C);
-    radio.writeReg(REG_FRFMID,0x7C);
-    radio.writeReg(REG_FRFLSB,0xCC);
-  #endif  
-  
-  #ifdef a2235h 
-    radio.writeReg(REG_FRFMSB,0x6C);
-    radio.writeReg(REG_FRFMID,0x7A);
-    radio.writeReg(REG_FRFLSB,0xE1);
-  #endif  
+  //Set radio frequency  
+  radio.setFrequencyMHz(TX_FREQ_MHZ);
   
   // +/- deviation freq = 61*register (6*61=366Hz, RTTY FSK shift=732 hz
   radio.writeReg(REG_FDEVMSB,0);
-  radio.writeReg(REG_FDEVLSB,3);      
+  radio.writeReg(REG_FDEVLSB,7);      
 
   //radio.writeReg(REG_PARAMP,0);
   radio.writeReg(REG_PARAMP,0b1111);
